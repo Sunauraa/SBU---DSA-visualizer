@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arrays &amp; Lists — CSE 214</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="../index.html"><span class="logo">D</span> DSA Visualizer</a>
+    <div class="crumbs"><a href="../index.html">Home</a> / <a href="index.html">CSE 214</a> / <span>Arrays &amp; Lists</span></div>
+    <div class="spacer"></div>
+    <span class="pill">2 structures</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1>Arrays &amp; Lists</h1>
+    <p>The same abstract list, two very different implementations. An array gives you O(1) random access but pays for
+       insertions by shifting; a linked list gives you O(1) splicing but has to walk to reach anything.</p>
+  </div>
+
+  <!-- ===================== dynamic array ===================== -->
+  <div class="panel">
+    <div class="panel-title">
+      <h2>Dynamic array <span class="muted small nowrap">(ArrayList / vector)</span></h2>
+      <span class="hint">watch the capacity double</span>
+    </div>
+
+    <div class="toolbar">
+      <div class="field"><label for="da-val">value</label><input type="number" id="da-val" placeholder="random"></div>
+      <div class="field"><label for="da-idx">index</label><input type="number" id="da-idx" value="2"></div>
+      <div class="sep"></div>
+      <button class="primary" id="da-add">add(value)</button>
+      <button id="da-insert">insert(i, value)</button>
+      <button id="da-remove">remove(i)</button>
+      <button id="da-get">get(i)</button>
+      <button id="da-find">indexOf(value)</button>
+      <div class="sep"></div>
+      <button id="da-fill">↻ Grow from empty</button>
+      <button class="danger" id="da-clear">clear</button>
+    </div>
+
+    <div class="stage" id="da-stage"></div>
+    <div id="da-player"></div>
+
+    <div class="stats">
+      <div class="stat"><span class="k">size</span><span class="v" id="da-size">0</span></div>
+      <div class="stat"><span class="k">capacity</span><span class="v" id="da-cap">4</span></div>
+      <div class="stat"><span class="k">load</span><span class="v" id="da-load">0%</span></div>
+      <div class="stat"><span class="k">element copies</span><span class="v" id="da-copies">0</span></div>
+      <div class="stat"><span class="k">resizes</span><span class="v" id="da-grows">0</span></div>
+    </div>
+
+    <div class="callout" style="margin-top:.9rem">
+      <b>Why "amortised O(1)"?</b> Doubling means the copies happen at sizes 1, 2, 4, 8, 16 … so the total copying cost
+      after <em>n</em> appends is 1 + 2 + 4 + … + n &lt; 2n. Spread over n appends that is a constant number of copies
+      each, even though a single unlucky append costs O(n). Hit <em>Grow from empty</em> and compare the
+      <span class="mono">element copies</span> counter to the size.
+    </div>
+  </div>
+
+  <!-- ===================== linked lists ===================== -->
+  <div class="panel">
+    <div class="panel-title">
+      <h2>Linked lists</h2>
+      <span class="hint">every hop is one frame</span>
+    </div>
+
+    <div id="ll-tabs"></div>
+
+    <div class="toolbar">
+      <div class="field"><label for="ll-val">value</label><input type="number" id="ll-val" placeholder="random"></div>
+      <div class="field"><label for="ll-idx">index</label><input type="number" id="ll-idx" value="2"></div>
+      <div class="sep"></div>
+      <button class="primary" id="ll-head">addFirst</button>
+      <button id="ll-tail">addLast</button>
+      <button id="ll-insert">insert(i)</button>
+      <div class="sep"></div>
+      <button id="ll-rhead">removeFirst</button>
+      <button id="ll-rtail">removeLast</button>
+      <button id="ll-rat">remove(i)</button>
+      <div class="sep"></div>
+      <button id="ll-search">search</button>
+      <button id="ll-reverse">reverse</button>
+      <button id="ll-rand">↻ random</button>
+      <button class="danger" id="ll-clear">clear</button>
+    </div>
+
+    <div class="stage" id="ll-stage"></div>
+    <div id="ll-player"></div>
+
+    <div class="stats">
+      <div class="stat"><span class="k">nodes</span><span class="v" id="ll-len">0</span></div>
+      <div class="stat"><span class="k">kind</span><span class="v" id="ll-kind" style="font-size:.85rem">singly linked</span></div>
+    </div>
+
+    <div id="ll-legend"></div>
+    <p class="small" style="color:var(--muted)" id="ll-note"></p>
+  </div>
+
+  <!-- ===================== comparison ===================== -->
+  <div class="panel" style="margin-bottom:2rem">
+    <h2>Array vs linked list</h2>
+    <div style="overflow-x:auto">
+      <table class="tbl" style="min-width:620px">
+        <tr><th>Operation</th><th>Dynamic array</th><th>Singly linked</th><th>Doubly linked</th></tr>
+        <tr><td>get(i) / set(i)</td><td class="one">O(1)</td><td>O(n)</td><td>O(n)</td></tr>
+        <tr><td>addFirst</td><td>O(n)</td><td class="one">O(1)</td><td class="one">O(1)</td></tr>
+        <tr><td>addLast</td><td class="one">O(1)*</td><td class="one">O(1) with tail ptr</td><td class="one">O(1)</td></tr>
+        <tr><td>removeFirst</td><td>O(n)</td><td class="one">O(1)</td><td class="one">O(1)</td></tr>
+        <tr><td>removeLast</td><td class="one">O(1)</td><td>O(n)</td><td class="one">O(1)</td></tr>
+        <tr><td>insert / remove at i</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr>
+        <tr><td>remove a node you already hold</td><td>O(n)</td><td>O(n)</td><td class="one">O(1)</td></tr>
+        <tr><td>search unsorted</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr>
+        <tr><td>memory per element</td><td class="one">1 slot (+ slack)</td><td>value + 1 pointer</td><td>value + 2 pointers</td></tr>
+      </table>
+    </div>
+    <p class="small muted" style="margin-bottom:0">* amortised. Note the last row of timings: insert-at-index is O(n)
+       for <em>both</em> structures — the array pays to shift, the list pays to walk. The linked list only wins when you
+       already hold a reference to the node.</p>
+  </div>
+</div>
+
+<footer class="site"></footer>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/arrays.js"></script>
+</body>
+</html>

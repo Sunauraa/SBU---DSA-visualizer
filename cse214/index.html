@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSE 214 — Data Structures Visualizers</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌲</text></svg>">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="../index.html"><span class="logo">D</span> DSA Visualizer</a>
+    <div class="crumbs"><a href="../index.html">Home</a> / <span>CSE 214</span></div>
+    <div class="spacer"></div>
+    <span class="pill">8 modules</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1>CSE 214 &middot; Data Structures</h1>
+    <p>Eight interactive modules. Each one records every step of the algorithm so you can play, pause, scrub and
+       step backwards through it.</p>
+  </div>
+
+  <div class="grid cols-3" style="margin-bottom:2rem">
+
+    <a class="card" href="arrays.html">
+      <div class="ico">🧱</div>
+      <h3>Arrays &amp; Lists</h3>
+      <p>Dynamic array growth and amortised cost, plus singly and doubly linked lists with pointer surgery shown
+         link by link.</p>
+      <div class="tags"><span class="tag">ArrayList</span><span class="tag">Singly</span><span class="tag">Doubly</span><span class="tag">Circular</span></div>
+    </a>
+
+    <a class="card" href="recursion.html">
+      <div class="ico">🔁</div>
+      <h3>Recursion</h3>
+      <p>Watch the call stack grow and unwind next to a live recursion tree: factorial, Fibonacci, Hanoi, binary
+         search, permutations and more.</p>
+      <div class="tags"><span class="tag">Call stack</span><span class="tag">Recursion tree</span><span class="tag">Memoisation</span></div>
+    </a>
+
+    <a class="card" href="stacks-queues.html">
+      <div class="ico">🥞</div>
+      <h3>Stacks, Queues &amp; Deques</h3>
+      <p>LIFO, FIFO and double-ended access, a circular-array queue with wrap-around, and a balanced-bracket
+         checker driven by a stack.</p>
+      <div class="tags"><span class="tag">push/pop</span><span class="tag">circular</span><span class="tag">deque</span><span class="tag">brackets</span></div>
+    </a>
+
+    <a class="card" href="trees.html">
+      <div class="ico">🌳</div>
+      <h3>Trees</h3>
+      <p>Traversals, binary search trees, AVL rotations, and multiway (2,4)-trees and B-trees with splits, transfers
+         and fusions.</p>
+      <div class="tags"><span class="tag">Traversals</span><span class="tag">BST</span><span class="tag">AVL</span><span class="tag">(2,4)</span><span class="tag">B-tree</span></div>
+    </a>
+
+    <a class="card" href="priority-queues.html">
+      <div class="ico">⛰️</div>
+      <h3>Priority Queues</h3>
+      <p>Binary heaps as array <em>and</em> tree at once: up-heap, down-heap, bottom-up heapify and
+         heap-sort in place.</p>
+      <div class="tags"><span class="tag">min/max heap</span><span class="tag">heapify</span><span class="tag">heap-sort</span></div>
+    </a>
+
+    <a class="card" href="hashtables.html">
+      <div class="ico">🗂️</div>
+      <h3>Hash Tables</h3>
+      <p>Separate chaining versus linear probing, quadratic probing and double hashing — with load factor,
+         clustering and rehashing.</p>
+      <div class="tags"><span class="tag">chaining</span><span class="tag">probing</span><span class="tag">rehash</span></div>
+    </a>
+
+    <a class="card" href="graphs.html">
+      <div class="ico">🕸️</div>
+      <h3>Graphs</h3>
+      <p>Build a graph by clicking, then run BFS or DFS with the live queue/stack, and see the adjacency matrix and
+         list update as you go.</p>
+      <div class="tags"><span class="tag">BFS</span><span class="tag">DFS</span><span class="tag">matrix</span><span class="tag">list</span></div>
+    </a>
+
+    <a class="card" href="sorting.html">
+      <div class="ico">📊</div>
+      <h3>Sorting Algorithms</h3>
+      <p>Eight sorts with synchronised pseudocode, comparison and swap counters: bubble, selection, insertion, heap,
+         merge, quick, two-third and counting.</p>
+      <div class="tags"><span class="tag">O(n²)</span><span class="tag">O(n log n)</span><span class="tag">linear</span></div>
+    </a>
+
+  </div>
+
+  <div class="callout" style="margin-bottom:2rem">
+    <b>Tip:</b> the controls are the same everywhere — <span class="mono">space</span> plays and pauses,
+    <span class="mono">&larr;</span> / <span class="mono">&rarr;</span> step one frame, and dragging the timeline
+    scrubs to any moment in the algorithm.
+  </div>
+</div>
+
+<footer class="site"></footer>
+<script src="../assets/js/core.js"></script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Priority Queues &amp; Heaps — CSE 214</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="../index.html"><span class="logo">D</span> DSA Visualizer</a>
+    <div class="crumbs"><a href="../index.html">Home</a> / <a href="index.html">CSE 214</a> / <span>Priority Queues</span></div>
+    <div class="spacer"></div>
+    <span class="pill">binary heap</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1>Priority Queues &amp; Binary Heaps</h1>
+    <p>A heap is a complete binary tree stored in a plain array — the tree is only in your head. Both views below are
+       the same data, so you can see the index arithmetic and the tree shape at once.</p>
+  </div>
+
+  <div class="panel">
+    <div class="toolbar">
+      <div class="field">
+        <label for="kind">order</label>
+        <select id="kind"><option value="min">min-heap</option><option value="max">max-heap</option></select>
+      </div>
+      <div class="field"><label for="val">value</label><input type="number" id="val" placeholder="random"></div>
+      <button class="primary" id="op-insert">insert</button>
+      <button id="op-remove">removeMin / removeMax</button>
+      <button id="op-peek">peek</button>
+      <div class="sep"></div>
+      <button id="op-heapify">bottom-up heapify Θ(n)</button>
+      <button id="op-insertbuild">build by insertion O(n log n)</button>
+      <button id="op-worst">worst-case order</button>
+      <button id="op-sort">heap-sort</button>
+      <div class="sep"></div>
+      <input type="text" id="custom" class="wide" placeholder="37, 12, 55, ...">
+      <button id="op-load">Load</button>
+      <button id="op-rand">↻ random</button>
+      <button class="danger" id="op-clear">clear</button>
+    </div>
+
+    <div class="small muted" style="margin-bottom:.3rem">array — the actual storage</div>
+    <div class="stage" id="arr-view"></div>
+    <div class="small muted" style="margin:.9rem 0 .3rem">the same array read as a complete binary tree</div>
+    <div class="stage" id="tree-view"></div>
+
+    <div id="player"></div>
+
+    <div class="stats">
+      <div class="stat"><span class="k">nodes</span><span class="v" id="h-size">0</span></div>
+      <div class="stat"><span class="k">height</span><span class="v" id="h-height">0</span></div>
+      <div class="stat"><span class="k">root</span><span class="v" id="h-root">–</span></div>
+      <div class="stat"><span class="k">kind</span><span class="v" id="h-kind" style="font-size:.85rem">min-heap</span></div>
+      <div class="stat"><span class="k">comparisons</span><span class="v" id="h-cmp">0</span></div>
+      <div class="stat"><span class="k">swaps</span><span class="v" id="h-swaps">0</span></div>
+    </div>
+
+    <div id="legend"></div>
+  </div>
+
+  <div class="row" style="margin-bottom:2rem">
+    <div class="col">
+      <div class="panel" style="height:100%">
+        <h2>Index arithmetic</h2>
+        <p class="small muted">No pointers anywhere — the tree structure <em>is</em> the arithmetic. For the node at
+           index <span class="mono">i</span> (0-based):</p>
+        <dl class="kv">
+          <dt>parent</dt><dd>⌊(i − 1) / 2⌋</dd>
+          <dt>left child</dt><dd>2i + 1</dd>
+          <dt>right child</dt><dd>2i + 2</dd>
+          <dt>is a leaf</dt><dd>2i + 1 ≥ n</dd>
+          <dt>first leaf</dt><dd>⌊n / 2⌋</dd>
+          <dt>height</dt><dd>⌊log₂ n⌋</dd>
+        </dl>
+        <p class="small muted" style="margin-bottom:0">Because the tree is <b>complete</b> there are never gaps, so the
+           array is always exactly n long and the height is guaranteed ⌊log₂n⌋ — no rebalancing needed, ever.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel" style="height:100%">
+        <h2>Two invariants, and what they do not say</h2>
+        <p class="small muted"><b>Shape:</b> complete — every level full except the last, which fills left to right.<br>
+           <b>Order:</b> every node is ≤ (min-heap) or ≥ (max-heap) both of its children.</p>
+        <p class="small muted">Heap order is <em>much</em> weaker than a BST's. It says nothing about siblings, and an
+           in-order traversal of a heap is meaningless. That weakness is the point: it is cheap enough to maintain that
+           insert and remove are both O(log n) with tiny constants.</p>
+        <div style="overflow-x:auto">
+          <table class="tbl" style="min-width:420px">
+            <tr><th>Operation</th><th>Unsorted array</th><th>Sorted array</th><th>Binary heap</th></tr>
+            <tr><td>insert</td><td class="one">O(1)</td><td>O(n)</td><td class="one">O(log n)</td></tr>
+            <tr><td>peek min</td><td>O(n)</td><td class="one">O(1)</td><td class="one">O(1)</td></tr>
+            <tr><td>remove min</td><td>O(n)</td><td class="one">O(1)</td><td class="one">O(log n)</td></tr>
+            <tr><td>build from n items</td><td class="one">O(n)</td><td>O(n log n)</td><td class="one">O(n)</td></tr>
+          </table>
+        </div>
+        <p class="small muted" style="margin:.5rem 0 0">Both build buttons run on the <em>same</em> values, so the
+           comparison counters are directly comparable. On random input they come out close — repeated insertion is
+           O(n) <em>on average</em>, because most elements stop climbing after a level or two. Press
+           <b>worst-case order</b> to feed insertion the input that forces every element to the root, then run
+           <em>bottom-up heapify</em> on the same 15 values: that is where the Θ(n) versus Θ(n&nbsp;log&nbsp;n)
+           gap actually shows up.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site"></footer>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/heaps.js"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hash Tables — CSE 214</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="../index.html"><span class="logo">D</span> DSA Visualizer</a>
+    <div class="crumbs"><a href="../index.html">Home</a> / <a href="index.html">CSE 214</a> / <span>Hash Tables</span></div>
+    <div class="spacer"></div>
+    <span class="pill">4 strategies</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1>Hash Tables</h1>
+    <p>A hash function turns a key into an index, which would give O(1) access if two keys never landed on the same
+       index. They do — so the whole subject is really about handling collisions.</p>
+  </div>
+
+  <div id="tabs" class="tabs"></div>
+
+  <div class="panel">
+    <div class="toolbar">
+      <div class="field"><label for="key">key</label><input type="text" id="key" placeholder="42 or cat" style="width:7rem"></div>
+      <button class="primary" id="op-insert">insert</button>
+      <button id="op-search">search</button>
+      <button id="op-delete">delete</button>
+      <div class="sep"></div>
+      <div class="field"><label for="msize">table size m</label><input type="number" id="msize" value="11" min="3" max="31" style="width:4.5rem"></div>
+      <label class="field small" style="cursor:pointer"><input type="checkbox" id="auto" checked style="width:auto"> auto-rehash</label>
+      <button id="op-rehash">rehash now</button>
+      <div class="sep"></div>
+      <button id="op-fill">↻ random keys</button>
+      <button id="op-words">string keys</button>
+      <button class="danger" id="op-clear">clear</button>
+    </div>
+
+    <div class="mono small muted" style="margin-bottom:.4rem" id="mode-formula"></div>
+    <div class="stage" id="table-view"></div>
+    <div id="player"></div>
+
+    <div class="stats">
+      <div class="stat"><span class="k">keys n</span><span class="v" id="t-n">0</span></div>
+      <div class="stat"><span class="k">slots m</span><span class="v" id="t-m">11</span></div>
+      <div class="stat"><span class="k">load α = n/m</span><span class="v" id="t-alpha">0.00</span></div>
+      <div class="stat"><span class="k">probes, this op</span><span class="v" id="t-probes">0</span></div>
+      <div class="stat"><span class="k">avg probes / op</span><span class="v" id="t-avg">–</span></div>
+      <div class="stat"><span class="k" id="t-extra-k">longest chain</span><span class="v" id="t-extra">0</span></div>
+    </div>
+
+    <div id="legend"></div>
+    <p class="small" style="color:var(--muted)" id="mode-blurb"></p>
+    <p class="small callout" id="dh-note" style="display:none">For m = <span class="mono" id="t-m2"></span> the secondary
+       hash uses the largest prime below m, q = <b class="mono" id="dh-q">7</b>, giving
+       <span class="mono">h₂(k) = q − (k mod q)</span> — always between 1 and q, so it is never 0 and never a multiple
+       of m.</p>
+  </div>
+
+  <div class="row" style="margin-bottom:2rem">
+    <div class="col">
+      <div class="panel" style="height:100%">
+        <h2>Expected probes vs load factor</h2>
+        <div style="overflow-x:auto">
+          <table class="tbl" style="min-width:460px">
+            <tr><th>α</th><th>chaining<br>(successful)</th><th>linear<br>(unsuccessful)</th><th>uniform / double<br>(unsuccessful)</th></tr>
+            <tr><td>0.25</td><td>1.13</td><td>1.39</td><td>1.33</td></tr>
+            <tr><td>0.50</td><td>1.25</td><td>2.50</td><td>2.00</td></tr>
+            <tr><td>0.75</td><td>1.38</td><td>8.50</td><td>4.00</td></tr>
+            <tr><td>0.90</td><td>1.45</td><td>50.5</td><td>10.0</td></tr>
+            <tr><td>0.99</td><td>1.50</td><td>5000</td><td>100</td></tr>
+          </table>
+        </div>
+        <p class="small muted" style="margin:.6rem 0 0">Chaining degrades gracefully (1 + α/2). Linear probing does
+           <em>not</em>: ½(1 + 1/(1−α)²) blows up as α → 1. That is why open-addressed tables rehash at α ≈ 0.5–0.7
+           while chaining tables can wait until α ≈ 1.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel" style="height:100%">
+        <h2>Things that bite people</h2>
+        <dl class="kv">
+          <dt>composite m</dt><dd>clusters keys; use a prime, or a power of two with a well-mixed hash</dd>
+          <dt>deleting by blanking</dt><dd>breaks probe chains — you must use tombstones</dd>
+          <dt>tombstone build-up</dt><dd>searches slow down even though n is small; rehash to clear them</dd>
+          <dt>bad hash</dt><dd>e.g. summing characters — "cat" and "act" collide; multiply by 31 instead</dd>
+          <dt>mutable keys</dt><dd>change a key after inserting and it is unfindable, since its hash moved</dd>
+          <dt>rehash cost</dt><dd>Θ(n) and unavoidable — every index depends on m</dd>
+        </dl>
+        <p class="small muted" style="margin:.7rem 0 0">Try this: switch to <b>linear probing</b>, press <em>random
+           keys</em> a few times, then delete two or three keys and search for something that is not there. You can
+           watch the search walk straight through the tombstones.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site"></footer>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/hashtables.js"></script>
+</body>
+</html>

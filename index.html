@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSA Visualizer — CSE 214 &amp; CSE 373</title>
+<meta name="description" content="Interactive data structure and algorithm visualizers for CSE 214 and CSE 373.">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌲</text></svg>">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="index.html"><span class="logo">D</span> DSA Visualizer</a>
+    <div class="spacer"></div>
+    <span class="pill">pick a course</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="hero">
+    <h1>Data Structures &amp; Algorithms<br><span class="grad">Visualizer</span></h1>
+    <p>Step through every insert, rotation, probe and swap — one frame at a time. Scrub backwards, change the speed,
+       and feed the structures your own data.</p>
+  </section>
+
+  <section class="grid cols-2" style="margin-bottom:2rem">
+    <a class="card course-card" href="cse214/index.html">
+      <span class="code">CSE 214</span>
+      <h2>Data Structures</h2>
+      <p>Lists, recursion, stacks &amp; queues, every flavour of tree, priority queues, hash tables, graphs and eight
+         sorting algorithms — all interactive.</p>
+      <div class="tags">
+        <span class="tag">Arrays / Lists</span>
+        <span class="tag">Recursion</span>
+        <span class="tag">Stacks / Queues</span>
+        <span class="tag">Trees</span>
+        <span class="tag">Priority Queues</span>
+        <span class="tag">Hash Tables</span>
+        <span class="tag">Graphs</span>
+        <span class="tag">Sorting</span>
+      </div>
+      <p style="margin-top:.9rem;color:var(--accent)">Open the 8 modules &rarr;</p>
+    </a>
+
+    <a class="card course-card soon" href="cse373/index.html">
+      <span class="badge-soon">coming next</span>
+      <span class="code">CSE 373</span>
+      <h2>Analysis of Algorithms</h2>
+      <p>Asymptotics, divide &amp; conquer, greedy algorithms, dynamic programming, graph algorithms and
+         intractability. The module shells are laid out — visualizers land here next.</p>
+      <div class="tags">
+        <span class="tag">Big-O</span>
+        <span class="tag">Divide &amp; Conquer</span>
+        <span class="tag">Greedy</span>
+        <span class="tag">DP</span>
+        <span class="tag">Shortest Paths</span>
+        <span class="tag">NP-Completeness</span>
+      </div>
+      <p style="margin-top:.9rem;color:var(--muted)">See what's planned &rarr;</p>
+    </a>
+  </section>
+
+  <section class="panel">
+    <h2>How the visualizers work</h2>
+    <div class="grid cols-3">
+      <div>
+        <h3 style="margin:.2rem 0 .3rem;font-size:.95rem">1 &middot; Give it data</h3>
+        <p class="small muted">Type your own values, or hit <em>Random</em>. Every module accepts custom input so you can
+           replay an exam question exactly.</p>
+      </div>
+      <div>
+        <h3 style="margin:.2rem 0 .3rem;font-size:.95rem">2 &middot; Run an operation</h3>
+        <p class="small muted">The algorithm runs and records every step. Nothing is thrown away, so you can scrub the
+           timeline like a video.</p>
+      </div>
+      <div>
+        <h3 style="margin:.2rem 0 .3rem;font-size:.95rem">3 &middot; Read the caption</h3>
+        <p class="small muted">Each frame explains itself in words, and the counters track comparisons, swaps, probes,
+           rotations and heights.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer class="site"></footer>
+<script src="assets/js/core.js"></script>
+</body>
+</html>
