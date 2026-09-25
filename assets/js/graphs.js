@@ -116,16 +116,16 @@
   }
 
   /* ---------------- traversals ---------------- */
-  function Ctx(limit) {
+  function Ctx(limit, code) {
     const R2 = new D.Recorder(limit || 900);
     return {
       frames: R2.frames,
-      snap(o) { R2.push(Object.assign({ ns: {}, es: {}, tags: {}, queue: null, stack: null, note: "", mhl: null, lhl: null, order: [] }, o)); },
+      snap(o) { R2.push(Object.assign({ ns: {}, es: {}, tags: {}, queue: null, stack: null, note: "", mhl: null, lhl: null, order: [], code: code }, o)); },
     };
   }
 
   function bfs(start) {
-    const c = Ctx(1200);
+    const c = Ctx(1200, "bfs");
     const n = nCount();
     const state = {}, dist = {}, parent = {}, order = [];
     const Q = [];
@@ -140,33 +140,34 @@
       return o;
     };
     const tre = {};
-    c.snap({ ns: ns(), note: "<b>BFS from " + name(start) + ".</b> Every vertex is <em>undiscovered</em>; the queue is empty.", queue: [], tags: tags() });
+    c.snap({ line: null, ns: ns(), note: "<b>BFS from " + name(start) + ".</b> Every vertex is <em>undiscovered</em>; the queue is empty.", queue: [], tags: tags() });
     state[start] = 1; dist[start] = 0; Q.push(start);
-    c.snap({ ns: Object.assign(ns(), { [start]: "active" }), note: "Discover " + name(start) + " with dist 0 and <b>enqueue</b> it. Marking it discovered <em>now</em> (not when it is dequeued) is what stops a vertex entering the queue twice.", queue: Q.slice(), tags: tags(), es: Object.assign({}, tre) });
+    c.snap({ line: "init", ns: Object.assign(ns(), { [start]: "active" }), note: "Discover " + name(start) + " with dist 0 and <b>enqueue</b> it. Marking it discovered <em>now</em> (not when it is dequeued) is what stops a vertex entering the queue twice.", queue: Q.slice(), tags: tags(), es: Object.assign({}, tre) });
+    c.snap({ line: "loop", ns: Object.assign(ns(), { [start]: "active" }), note: "The queue holds " + name(start) + ", so it is not empty — enter the loop.", queue: Q.slice(), tags: tags(), es: Object.assign({}, tre) });
     while (Q.length) {
       const u = Q.shift();
       order.push(u);
-      c.snap({ ns: Object.assign(ns(), { [u]: "active" }), note: "<b>Dequeue " + name(u) + "</b> (dist " + dist[u] + "). Everything in the queue is at distance " + dist[u] + " or " + (dist[u] + 1) + " — BFS never mixes more than two levels.", queue: Q.slice(), tags: tags(), es: Object.assign({}, tre), lhl: u, order: order.slice() });
+      c.snap({ line: "deq", ns: Object.assign(ns(), { [u]: "active" }), note: "<b>Dequeue " + name(u) + "</b> (dist " + dist[u] + "). Everything in the queue is at distance " + dist[u] + " or " + (dist[u] + 1) + " — BFS never mixes more than two levels.", queue: Q.slice(), tags: tags(), es: Object.assign({}, tre), lhl: u, order: order.slice() });
       for (const v of G.adj[u]) {
         const nsx = ns();
         nsx[u] = "active";
         if (!state[v]) nsx[v] = "target";
-        c.snap({ ns: nsx, es: Object.assign({}, tre, { [ekey(u, v)]: "on" }), note: "Look at neighbour " + name(v) + ": " + (state[v] ? "already discovered, so <b>skip</b> it — this edge is not part of the BFS tree." : "<b>undiscovered</b>."), queue: Q.slice(), tags: tags(), mhl: { r: u, c: v }, lhl: u, order: order.slice() });
+        c.snap({ line: ["nbr", "check"], ns: nsx, es: Object.assign({}, tre, { [ekey(u, v)]: "on" }), note: "Next neighbour of " + name(u) + " is " + name(v) + ": " + (state[v] ? "already discovered, so <b>skip</b> it — this edge is not part of the BFS tree." : "<b>undiscovered</b>."), queue: Q.slice(), tags: tags(), mhl: { r: u, c: v }, lhl: u, order: order.slice() });
         if (!state[v]) {
           state[v] = 1; dist[v] = dist[u] + 1; parent[v] = u;
           tre[ekey(u, v)] = "tree";
           Q.push(v);
-          c.snap({ ns: ns(), es: Object.assign({}, tre), note: "Set dist[" + name(v) + "] = dist[" + name(u) + "] + 1 = " + dist[v] + ", parent = " + name(u) + ", and enqueue. Because the queue is FIFO, this is guaranteed to be the <b>shortest</b> path in edges.", queue: Q.slice(), tags: tags(), mhl: { r: u, c: v }, lhl: u, order: order.slice() });
+          c.snap({ line: "set", ns: ns(), es: Object.assign({}, tre), note: "Set dist[" + name(v) + "] = dist[" + name(u) + "] + 1 = " + dist[v] + ", parent = " + name(u) + ", and enqueue. Because the queue is FIFO, this is guaranteed to be the <b>shortest</b> path in edges.", queue: Q.slice(), tags: tags(), mhl: { r: u, c: v }, lhl: u, order: order.slice() });
         }
       }
       state[u] = 2;
-      c.snap({ ns: ns(), es: Object.assign({}, tre), note: name(u) + " is finished — all of its edges have been examined.", queue: Q.slice(), tags: tags(), order: order.slice() });
+      c.snap({ line: "loop", ns: ns(), es: Object.assign({}, tre), note: (G.adj[u].length ? "No neighbours of " + name(u) + " are left" : name(u) + " has no neighbours") + ", so it is finished. Back to the while test: the queue " + (Q.length ? "still holds " + Q.map(name).join(", ") + "." : "is <b>empty</b>, so the loop ends."), queue: Q.slice(), tags: tags(), order: order.slice() });
     }
     const unreached = [];
     for (let i = 0; i < n; i++) if (!state[i]) unreached.push(name(i));
     c.snap({
-      ns: ns(), es: Object.assign({}, tre), queue: [], tags: tags(), order: order.slice(),
-      note: "Queue empty — BFS is done. Visit order: <b>" + order.map(name).join(" ") + "</b>. " +
+      line: null, ns: ns(), es: Object.assign({}, tre), queue: [], tags: tags(), order: order.slice(),
+      note: "BFS is done. Visit order: <b>" + order.map(name).join(" ") + "</b>. " +
         (unreached.length ? "Never reached: <b>" + unreached.join(", ") + "</b> — they are in different connected components." : "Every vertex was reached, so the graph is connected from " + name(start) + ".") +
         " The green edges form the <b>BFS tree</b>, and each dist label is a shortest-path length. Total work Θ(V + E).",
     });
@@ -174,7 +175,7 @@
   }
 
   function dfs(start, forest) {
-    const c = Ctx(1600);
+    const c = Ctx(1600, "dfs");
     const n = nCount();
     const color = {}, disc = {}, fin = {}, stack = [], order = [];
     let time = 0;
@@ -189,38 +190,38 @@
       for (let i = 0; i < n; i++) if (disc[i] != null) o[i] = disc[i] + "/" + (fin[i] == null ? "…" : fin[i]);
       return o;
     };
-    c.snap({ ns: ns(), stack: [], note: "<b>DFS from " + name(start) + ".</b> Labels below each vertex will show <span class='mono'>discovery/finish</span> times. White = undiscovered, amber = on the stack (grey), green = finished (black).", tags: tags() });
+    c.snap({ line: forest ? "forest" : null, ns: ns(), stack: [], note: "<b>DFS from " + name(start) + ".</b> Labels below each vertex will show <span class='mono'>discovery/finish</span> times. White = undiscovered, amber = on the stack (grey), green = finished (black).", tags: tags() });
 
     function visit(u) {
       color[u] = 1; disc[u] = ++time; stack.push(u); order.push(u);
-      c.snap({ ns: Object.assign(ns(), { [u]: "active" }), es: Object.assign({}, tre), stack: stack.slice(), tags: tags(), lhl: u, order: order.slice(), note: "<b>Discover " + name(u) + "</b> at time " + disc[u] + " and push it. DFS goes as deep as it can before backtracking." });
+      c.snap({ line: "disc", ns: Object.assign(ns(), { [u]: "active" }), es: Object.assign({}, tre), stack: stack.slice(), tags: tags(), lhl: u, order: order.slice(), note: "<b>Discover " + name(u) + "</b> at time " + disc[u] + " and push it. DFS goes as deep as it can before backtracking." });
       for (const v of G.adj[u]) {
         const kind = !color[v] ? "tree" : color[v] === 1 ? "back" : disc[u] < disc[v] ? "forward" : "cross";
         c.snap({
-          ns: Object.assign(ns(), { [u]: "active" }), es: Object.assign({}, tre, { [ekey(u, v)]: "on" }), stack: stack.slice(), tags: tags(), mhl: { r: u, c: v }, lhl: u, order: order.slice(),
+          line: !color[v] ? ["nbr", "check", "rec"] : ["nbr", "check"], ns: Object.assign(ns(), { [u]: "active" }), es: Object.assign({}, tre, { [ekey(u, v)]: "on" }), stack: stack.slice(), tags: tags(), mhl: { r: u, c: v }, lhl: u, order: order.slice(),
           note: "Edge " + name(u) + "→" + name(v) + ": " + name(v) + " is " +
-            (!color[v] ? "<b>white</b>, so this is a <b>tree edge</b> — recurse into it." :
+            (!color[v] ? "<b>white</b>, so this is a <b>tree edge</b> — call DFS(" + name(v) + ") and go deeper. " + name(u) + " waits on the stack." :
               color[v] === 1 ? "<b>grey</b> (still on the stack), so this is a <b>back edge</b> — it closes a cycle." :
                 G.directed ? "<b>black</b>, so this is a <b>" + kind + " edge</b> (no new information)." : "already finished — in an undirected graph this is just the edge we came in on, seen from the other side."),
         });
-        if (!color[v]) { tre[ekey(u, v)] = "tree"; visit(v); c.snap({ ns: Object.assign(ns(), { [u]: "active" }), es: Object.assign({}, tre), stack: stack.slice(), tags: tags(), lhl: u, order: order.slice(), note: "Back at " + name(u) + " after finishing that subtree — continue with its remaining neighbours." }); }
+        if (!color[v]) { tre[ekey(u, v)] = "tree"; visit(v); c.snap({ line: "rec", ns: Object.assign(ns(), { [u]: "active" }), es: Object.assign({}, tre), stack: stack.slice(), tags: tags(), lhl: u, order: order.slice(), note: "Back at " + name(u) + " after finishing that subtree — continue with its remaining neighbours." }); }
       }
       color[u] = 2; fin[u] = ++time; stack.pop();
-      c.snap({ ns: ns(), es: Object.assign({}, tre), stack: stack.slice(), tags: tags(), order: order.slice(), note: "No unexplored edges left at " + name(u) + " — <b>finish</b> it at time " + fin[u] + " and pop. Its whole subtree is done." });
+      c.snap({ line: "fin", ns: ns(), es: Object.assign({}, tre), stack: stack.slice(), tags: tags(), order: order.slice(), note: (G.adj[u].length ? "The neighbour loop is done" : name(u) + " has no neighbours") + " — no unexplored edges left at " + name(u) + " — <b>finish</b> it at time " + fin[u] + " and pop. Its whole subtree is done." });
     }
 
     visit(start);
     if (forest) {
       for (let i = 0; i < n; i++)
         if (!color[i]) {
-          c.snap({ ns: ns(), es: Object.assign({}, tre), stack: [], tags: tags(), order: order.slice(), note: "The stack is empty but " + name(i) + " is still white — it is in another component. Start a <b>new DFS tree</b> there. Repeating this over all vertices is how you count connected components." });
+          c.snap({ line: "forest", ns: ns(), es: Object.assign({}, tre), stack: [], tags: tags(), order: order.slice(), note: "The stack is empty but " + name(i) + " is still white — it is in another component. Start a <b>new DFS tree</b> there. Repeating this over all vertices is how you count connected components." });
           visit(i);
         }
     }
     const unreached = [];
     for (let i = 0; i < n; i++) if (!color[i]) unreached.push(name(i));
     c.snap({
-      ns: ns(), es: Object.assign({}, tre), stack: [], tags: tags(), order: order.slice(),
+      line: null, ns: ns(), es: Object.assign({}, tre), stack: [], tags: tags(), order: order.slice(),
       note: "DFS complete. Discovery order: <b>" + order.map(name).join(" ") + "</b>. " +
         (unreached.length ? "Unreached: <b>" + unreached.join(", ") + "</b> (try <em>DFS forest</em> to cover them). " : "") +
         "Every vertex has an interval [disc, fin]; two intervals are either nested or disjoint — never partially overlapping. That is the <b>parenthesis theorem</b>, and it is why sorting by decreasing finish time gives a topological order. Θ(V + E).",
@@ -232,7 +233,7 @@
   function render(f) {
     const host = q("gr-canvas");
     host.innerHTML = "";
-    const svg = D.svg("svg", { class: "canvas", viewBox: "0 0 " + VW + " " + VH, width: VW, height: VH, style: "max-width:100%;height:auto;cursor:" + (tool === "add" ? "crosshair" : tool === "move" ? "grab" : "pointer") });
+    const svg = D.svg("svg", { class: "canvas", viewBox: "0 0 " + VW + " " + VH, width: VW, height: VH, style: "max-width:100%;height:auto;margin:0 auto;cursor:" + (tool === "add" ? "crosshair" : "pointer") });
     svg.appendChild(D.svg("defs", {}, [mk("gArw", "#5b6a92"), mk("gArwOn", "#6ea8fe"), mk("gArwTree", "#4ade80")]));
     svg.appendChild(D.svg("rect", { x: 0, y: 0, width: VW, height: VH, fill: "transparent" }));
 
@@ -250,7 +251,7 @@
     for (let i = 0; i < nCount(); i++) {
       const p = G.pos[i];
       const cls = (f.ns && f.ns[i]) || "";
-      const g = D.svg("g", { style: "cursor:pointer", "data-node": i });
+      const g = D.svg("g", { style: "cursor:grab", "data-node": i });
       g.appendChild(D.svg("circle", { cx: p.x, cy: p.y, r: R, class: "node-c " + cls + (pendingEdge === i ? " target" : "") }));
       g.appendChild(D.sText(p.x, p.y, name(i), { "font-size": 13 }));
       if (f.tags && f.tags[i]) g.appendChild(D.sText(p.x, p.y + R + 11, f.tags[i], { class: "lbl-s", fill: "#ffc14d", "font-size": 11 }));
@@ -258,7 +259,6 @@
     }
     if (!nCount()) svg.appendChild(D.sText(VW / 2, VH / 2, "click anywhere to add a vertex", { class: "lbl-s", "font-size": 14 }));
     host.appendChild(svg);
-    wire(svg);
 
     /* queue / stack */
     const fr = q("frontier");
@@ -334,31 +334,56 @@
     }
     return -1;
   }
-  function wire(svg) {
-    svg.addEventListener("mousedown", (ev) => {
-      const pt = localPt(svg, ev), i = hit(pt);
-      if (tool === "move" && i >= 0) { dragging = i; ev.preventDefault(); return; }
-      if (tool === "del") {
-        if (i >= 0) delNode(i);
-        return;
-      }
-      /* add / connect */
-      if (i < 0) { pendingEdge = -1; addNode(pt.x, pt.y); return; }
-      if (pendingEdge < 0) { pendingEdge = i; refresh("Selected <b>" + name(i) + "</b> — now click another vertex to add or remove the edge (or click empty space to cancel)."); return; }
-      if (pendingEdge === i) { pendingEdge = -1; refresh("Deselected."); return; }
-      const a = pendingEdge;
-      pendingEdge = -1;
-      toggleEdge(a, i);
-    });
-    svg.addEventListener("mousemove", (ev) => {
-      if (dragging < 0) return;
+  /* Listeners live on the host <div>, not the <svg>: the svg is rebuilt on every
+     frame, which would drop pointer capture in the middle of a drag.
+     Any vertex can be dragged in any tool mode; a press that doesn't move counts
+     as a click (add / connect / delete). Dragging redraws the CURRENT frame, so
+     you can rearrange the picture in the middle of a BFS/DFS without losing it. */
+  let down = null;
+  function wireHost(host) {
+    host.style.touchAction = "none";
+    host.addEventListener("pointerdown", (ev) => {
+      const svg = host.querySelector("svg");
+      if (!svg || ev.button > 0) return;
       const pt = localPt(svg, ev);
-      G.pos[dragging] = { x: D.clamp(pt.x, R + 4, VW - R - 4), y: D.clamp(pt.y, R + 4, VH - R - 4) };
-      renderStatic(null, true);
+      down = { i: hit(pt), x: ev.clientX, y: ev.clientY, moved: false, pt: pt };
+      try { host.setPointerCapture(ev.pointerId); } catch (e) {}
+      ev.preventDefault();
     });
-    const stop = () => { if (dragging >= 0) { dragging = -1; refresh(); } };
-    svg.addEventListener("mouseup", stop);
-    svg.addEventListener("mouseleave", stop);
+    host.addEventListener("pointermove", (ev) => {
+      const svg = host.querySelector("svg");
+      if (!svg) return;
+      if (!down) { const i = hit(localPt(svg, ev)); svg.style.cursor = i >= 0 ? "grab" : tool === "add" ? "crosshair" : "default"; return; }
+      if (down.i < 0) return;
+      if (!down.moved && Math.hypot(ev.clientX - down.x, ev.clientY - down.y) < 4) return;
+      down.moved = true;
+      const pt = localPt(svg, ev);
+      G.pos[down.i] = { x: D.clamp(pt.x, R + 4, VW - R - 4), y: D.clamp(pt.y, R + 4, VH - R - 4) };
+      dragging = down.i;
+      render(player.frames[player.index] || baseFrame());
+      const s2 = host.querySelector("svg");
+      if (s2) s2.style.cursor = "grabbing";
+    });
+    const up = (ev) => {
+      if (!down) return;
+      const d = down;
+      down = null;
+      dragging = -1;
+      try { host.releasePointerCapture(ev.pointerId); } catch (e) {}
+      if (d.moved) return;
+      click(d.i, d.pt);
+    };
+    host.addEventListener("pointerup", up);
+    host.addEventListener("pointercancel", () => { down = null; dragging = -1; });
+  }
+  function click(i, pt) {
+    if (tool === "del") { if (i >= 0) delNode(i); return; }
+    if (i < 0) { pendingEdge = -1; addNode(pt.x, pt.y); return; }
+    if (pendingEdge < 0) { pendingEdge = i; refresh("Selected <b>" + name(i) + "</b>. Now click another vertex to add or remove that edge, or click empty space to cancel."); return; }
+    if (pendingEdge === i) { pendingEdge = -1; refresh("Deselected."); return; }
+    const a = pendingEdge;
+    pendingEdge = -1;
+    toggleEdge(a, i);
   }
 
   /* ---------------- driver ---------------- */
@@ -382,105 +407,127 @@
   }
 
   /* ---------- the two traversals, side by side in four languages ---------- */
-  const BFS_CODE = {
-    pseudo: [
-      "BFS(s):",
-      "  mark s discovered",
-      "  Q ← [s]",
-      "  while Q not empty:",
-      "    u ← Q.dequeue()",
-      "    for v in adj[u]:",
-      "      if v undiscovered:",
-      "        dist[v] ← dist[u] + 1",
-      "        mark v discovered",
-      "        Q.enqueue(v)",
-    ],
-    java: [
-      "void bfs(int s) {",
-      "  seen[s] = true;",
-      "  Queue<Integer> q = new ArrayDeque<>();",
-      "  q.add(s);",
-      "  while (!q.isEmpty()) {",
-      "    int u = q.remove();",
-      "    for (int v : adj[u])",
-      "      if (!seen[v]) {",
-      "        dist[v] = dist[u] + 1;",
-      "        seen[v] = true;",
-      "        q.add(v);",
-      "      }",
-      "  }",
-      "}",
-    ],
-    cpp: [
-      "void bfs(int s) {",
-      "  seen[s] = true;",
-      "  queue<int> q;",
-      "  q.push(s);",
-      "  while (!q.empty()) {",
-      "    int u = q.front(); q.pop();",
-      "    for (int v : adj[u])",
-      "      if (!seen[v]) {",
-      "        dist[v] = dist[u] + 1;",
-      "        seen[v] = true;",
-      "        q.push(v);",
-      "      }",
-      "  }",
-      "}",
-    ],
-    python: [
-      "def bfs(s):",
-      "  seen[s] = True",
-      "  q = deque([s])",
-      "  while q:",
-      "    u = q.popleft()",
-      "    for v in adj[u]:",
-      "      if not seen[v]:",
-      "        dist[v] = dist[u] + 1",
-      "        seen[v] = True",
-      "        q.append(v)",
-    ],
-  };
-  const DFS_CODE = {
-    pseudo: [
-      "DFS(u):",
-      "  mark u discovered",
-      "  for v in adj[u]:",
-      "    if v undiscovered:",
-      "      DFS(v)",
-      "  mark u finished",
-    ],
-    java: [
-      "void dfs(int u) {",
-      "  seen[u] = true;",
-      "  for (int v : adj[u])",
-      "    if (!seen[v])",
-      "      dfs(v);",
-      "  done[u] = true;",
-      "}",
-    ],
-    cpp: [
-      "void dfs(int u) {",
-      "  seen[u] = true;",
-      "  for (int v : adj[u])",
-      "    if (!seen[v])",
-      "      dfs(v);",
-      "  done[u] = true;",
-      "}",
-    ],
-    python: [
-      "def dfs(u):",
-      "  seen[u] = True",
-      "  for v in adj[u]:",
-      "    if not seen[v]:",
-      "      dfs(v)",
-      "  done[u] = True",
-    ],
+  const CODE = {
+    bfs: {
+      title: "BFS(s) — breadth-first search",
+      pseudo: [
+        "BFS(s):",
+        "  mark s discovered;  dist[s] ← 0 @@init",
+        "  Q ← [s] @@init",
+        "  while Q is not empty: @@loop",
+        "    u ← Q.dequeue() @@deq",
+        "    for each v in adj[u]: @@nbr",
+        "      if v is undiscovered: @@check",
+        "        dist[v] ← dist[u] + 1;  parent[v] ← u @@set",
+        "        mark v discovered           // now, not when dequeued @@set",
+        "        Q.enqueue(v) @@set",
+      ],
+      java: [
+        "void bfs(int s) {",
+        "  seen[s] = true;  dist[s] = 0; @@init",
+        "  Queue<Integer> q = new ArrayDeque<>();  q.add(s); @@init",
+        "  while (!q.isEmpty()) { @@loop",
+        "    int u = q.remove(); @@deq",
+        "    for (int v : adj.get(u)) @@nbr",
+        "      if (!seen[v]) { @@check",
+        "        dist[v] = dist[u] + 1;  parent[v] = u; @@set",
+        "        seen[v] = true; @@set",
+        "        q.add(v); @@set",
+        "      }",
+        "  }",
+        "}",
+      ],
+      cpp: [
+        "void bfs(int s) {",
+        "  seen[s] = true;  dist[s] = 0; @@init",
+        "  queue<int> q;  q.push(s); @@init",
+        "  while (!q.empty()) { @@loop",
+        "    int u = q.front();  q.pop(); @@deq",
+        "    for (int v : adj[u]) @@nbr",
+        "      if (!seen[v]) { @@check",
+        "        dist[v] = dist[u] + 1;  parent[v] = u; @@set",
+        "        seen[v] = true; @@set",
+        "        q.push(v); @@set",
+        "      }",
+        "  }",
+        "}",
+      ],
+      python: [
+        "def bfs(s):",
+        "  seen[s], dist[s] = True, 0 @@init",
+        "  q = deque([s]) @@init",
+        "  while q: @@loop",
+        "    u = q.popleft() @@deq",
+        "    for v in adj[u]: @@nbr",
+        "      if not seen[v]: @@check",
+        "        dist[v], parent[v] = dist[u] + 1, u @@set",
+        "        seen[v] = True @@set",
+        "        q.append(v) @@set",
+      ],
+    },
+    dfs: {
+      title: "DFS(u) — depth-first search",
+      pseudo: [
+        "DFS(u):",
+        "  color[u] ← GREY;  d[u] ← ++time        // discover @@disc",
+        "  for each v in adj[u]: @@nbr",
+        "    if color[v] == WHITE: @@check",
+        "      DFS(v)                               // tree edge @@rec",
+        "  color[u] ← BLACK;  f[u] ← ++time       // finish @@fin",
+        "",
+        "DFSForest():",
+        "  for each vertex u: @@forest",
+        "    if color[u] == WHITE: DFS(u)           // a new tree @@forest",
+      ],
+      java: [
+        "void dfs(int u) {",
+        "  color[u] = GREY;  d[u] = ++time; @@disc",
+        "  for (int v : adj.get(u)) @@nbr",
+        "    if (color[v] == WHITE) @@check",
+        "      dfs(v); @@rec",
+        "  color[u] = BLACK;  f[u] = ++time; @@fin",
+        "}",
+        "",
+        "void dfsForest() {",
+        "  for (int u = 0; u < n; u++) @@forest",
+        "    if (color[u] == WHITE) dfs(u); @@forest",
+        "}",
+      ],
+      cpp: [
+        "void dfs(int u) {",
+        "  color[u] = GREY;  d[u] = ++time; @@disc",
+        "  for (int v : adj[u]) @@nbr",
+        "    if (color[v] == WHITE) @@check",
+        "      dfs(v); @@rec",
+        "  color[u] = BLACK;  f[u] = ++time; @@fin",
+        "}",
+        "",
+        "void dfsForest() {",
+        "  for (int u = 0; u < n; u++) @@forest",
+        "    if (color[u] == WHITE) dfs(u); @@forest",
+        "}",
+      ],
+      python: [
+        "def dfs(u):",
+        "  global time",
+        "  time += 1;  color[u], d[u] = GREY, time @@disc",
+        "  for v in adj[u]: @@nbr",
+        "    if color[v] == WHITE: @@check",
+        "      dfs(v) @@rec",
+        "  time += 1;  color[u], f[u] = BLACK, time @@fin",
+        "",
+        "def dfs_forest():",
+        "  for u in range(n): @@forest",
+        "    if color[u] == WHITE: @@forest",
+        "      dfs(u) @@forest",
+      ],
+    },
   };
 
   document.addEventListener("DOMContentLoaded", function () {
-    player = new D.Player({ mount: "#player", render: render, delay: 700 });
-    D.CodeBlock("#bfs-code", BFS_CODE);
-    D.CodeBlock("#dfs-code", DFS_CODE, { switcher: false });
+    const dock = D.CodeDock("#code", CODE);
+    player = new D.Player({ mount: "#player", render: render, delay: 700, code: dock });
+    wireHost(q("gr-canvas"));
 
     D.$$("[data-tool]").forEach((b) =>
       b.addEventListener("click", () => {
@@ -488,9 +535,8 @@
         pendingEdge = -1;
         D.$$("[data-tool]").forEach((x) => x.classList.toggle("active", x === b));
         q("tool-hint").innerHTML =
-          tool === "add" ? "Click empty space to <b>add a vertex</b>; click one vertex then another to <b>toggle an edge</b>."
-            : tool === "move" ? "<b>Drag</b> vertices to rearrange the drawing. The graph itself does not change — only the picture."
-              : "Click a vertex to <b>delete</b> it, along with every edge that touches it.";
+          tool === "add" ? "Click empty space to <b>add a vertex</b>. Click one vertex, then another, to <b>toggle an edge</b>. <b>Drag</b> any vertex to move it."
+            : "Click a vertex to <b>delete</b> it, along with every edge that touches it. Dragging still moves vertices.";
         renderStatic();
       })
     );
@@ -508,24 +554,33 @@
       refresh("Loaded the <b>" + e.target.value + "</b> graph: " + nCount() + " vertices, " + edgeCount() + " edges.");
     });
     q("btn-clear").addEventListener("click", () => { G.pos = []; G.adj = []; refresh("Empty graph — click to start building."); });
-    q("btn-bfs").addEventListener("click", () => {
+    const go = (kind) => {
       if (!nCount()) return D.toast("Add some vertices first.", true);
-      const c = bfs(+q("start").value || 0);
-      q("algo-explain").innerHTML = EXPL.bfs;
+      const st = +q("start").value || 0;
+      const c = kind === "bfs" ? bfs(st) : dfs(st, kind === "forest");
+      q("algo-explain").innerHTML = EXPL[kind];
       player.load(c.frames, true);
-    });
-    q("btn-dfs").addEventListener("click", () => {
-      if (!nCount()) return D.toast("Add some vertices first.", true);
-      const c = dfs(+q("start").value || 0, false);
-      q("algo-explain").innerHTML = EXPL.dfs;
-      player.load(c.frames, true);
-    });
-    q("btn-forest").addEventListener("click", () => {
-      if (!nCount()) return D.toast("Add some vertices first.", true);
-      const c = dfs(+q("start").value || 0, true);
-      q("algo-explain").innerHTML = EXPL.forest;
-      player.load(c.frames, true);
-    });
+    };
+    q("btn-bfs").addEventListener("click", () => go("bfs"));
+    q("btn-dfs").addEventListener("click", () => go("dfs"));
+    q("btn-forest").addEventListener("click", () => go("forest"));
+
+    const example = (preset, directed, start, kind) => () => {
+      q("directed").checked = directed;
+      G.directed = directed;
+      q("preset").value = preset;
+      PRESETS[preset]();
+      syncStart();
+      q("start").value = start;
+      go(kind);
+    };
+    D.Examples("#examples", [
+      { label: "BFS on a grid: shortest paths", desc: "dist labels grow level by level", run: example("grid", false, 0, "bfs") },
+      { label: "DFS finds a cycle (back edge)", run: example("cycle", false, 0, "dfs") },
+      { label: "BFS vs DFS on a tree", desc: "Run BFS, then DFS, on the same tree", run: example("tree", false, 0, "bfs") },
+      { label: "count components with a DFS forest", run: example("disconnected", false, 0, "forest") },
+      { label: "directed DFS: tree / back / cross edges", run: example("sample", true, 0, "dfs") },
+    ]);
 
     D.legend("#legend", [
       { color: "var(--c-idle)", label: "undiscovered (white)" },

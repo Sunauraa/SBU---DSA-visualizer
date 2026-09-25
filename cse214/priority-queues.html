@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Priority Queues &amp; Heaps — CSE 214</title>
+<title>Priority Queues — CSE 214</title>
 <link rel="stylesheet" href="../assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
 </head>
@@ -14,99 +14,98 @@
     <a class="brand" href="../index.html"><span class="logo">D</span> DSA Visualizer</a>
     <div class="crumbs"><a href="../index.html">Home</a> / <a href="index.html">CSE 214</a> / <span>Priority Queues</span></div>
     <div class="spacer"></div>
-    <span class="pill">binary heap</span>
+    <span class="pill">4 implementations</span>
   </div>
 </div>
 
 <div class="wrap">
   <div class="page-head">
-    <h1>Priority Queues &amp; Binary Heaps</h1>
-    <p>A heap is a complete binary tree stored in a plain array — the tree is only in your head. Both views below are
-       the same data, so you can see the index arithmetic and the tree shape at once.</p>
+    <h1>Priority Queues</h1>
+    <p>One ADT with three operations (insert, min, removeMin) and four ways to build it. Each implementation moves
+       the work to a different place. Then the same ADT gives you three sorting algorithms for free.</p>
   </div>
+
+  <div id="tabs" class="tabs"></div>
 
   <div class="panel">
     <div class="toolbar">
-      <div class="field">
-        <label for="kind">order</label>
-        <select id="kind"><option value="min">min-heap</option><option value="max">max-heap</option></select>
+      <div class="toolbar" data-tab="unsorted sorted aheap theap" style="margin:0">
+        <div class="field"><label for="val">key</label><input type="number" id="val" placeholder="random"></div>
+        <div class="sep"></div>
+        <button id="op-insert">insert(k)</button>
+        <button id="op-remove">removeMin()</button>
+        <button id="op-min">min()</button>
+        <button id="op-rand">↻ random</button>
+        <button class="danger" id="op-clear">clear</button>
       </div>
-      <div class="field"><label for="val">value</label><input type="number" id="val" placeholder="random"></div>
-      <button class="primary" id="op-insert">insert</button>
-      <button id="op-remove">removeMin / removeMax</button>
-      <button id="op-peek">peek</button>
-      <div class="sep"></div>
-      <button id="op-heapify">bottom-up heapify Θ(n)</button>
-      <button id="op-insertbuild">build by insertion O(n log n)</button>
-      <button id="op-worst">worst-case order</button>
-      <button id="op-sort">heap-sort</button>
-      <div class="sep"></div>
-      <input type="text" id="custom" class="wide" placeholder="37, 12, 55, ...">
-      <button id="op-load">Load</button>
-      <button id="op-rand">↻ random</button>
-      <button class="danger" id="op-clear">clear</button>
+      <div class="toolbar" data-tab="aheap" style="margin:0">
+        <div class="sep"></div>
+        <input type="text" id="heap-input" class="wide" placeholder="37, 12, 55, … (blank = random)" aria-label="keys to build from">
+        <button id="op-heapify">bottom-up heapify Θ(n)</button>
+        <button id="op-build">build by insertion O(n log n)</button>
+      </div>
+      <div class="toolbar" data-tab="sort" style="margin:0">
+        <div class="field"><label for="sort-algo">sort</label>
+          <select id="sort-algo">
+            <option value="selection">selection sort (unsorted-list PQ)</option>
+            <option value="insertion">insertion sort (sorted-list PQ)</option>
+            <option value="heap">heap sort (heap PQ)</option>
+          </select>
+        </div>
+        <input type="text" id="sort-input" class="wide" value="42, 7, 19, 88, 3, 56, 24, 61" aria-label="keys to sort">
+        <button id="sort-rand">↻</button>
+        <button class="primary" id="sort-run">▶ run PQ-sort</button>
+      </div>
     </div>
 
-    <div class="small muted" style="margin-bottom:.3rem">array — the actual storage</div>
-    <div class="stage" id="arr-view"></div>
-    <div class="small muted" style="margin:.9rem 0 .3rem">the same array read as a complete binary tree</div>
-    <div class="stage" id="tree-view"></div>
-
+    <div id="examples"></div>
+    <div id="code"></div>
+    <div class="stage" id="stage"></div>
     <div id="player"></div>
-
-    <div class="stats">
-      <div class="stat"><span class="k">nodes</span><span class="v" id="h-size">0</span></div>
-      <div class="stat"><span class="k">height</span><span class="v" id="h-height">0</span></div>
-      <div class="stat"><span class="k">root</span><span class="v" id="h-root">–</span></div>
-      <div class="stat"><span class="k">kind</span><span class="v" id="h-kind" style="font-size:.85rem">min-heap</span></div>
-      <div class="stat"><span class="k">comparisons</span><span class="v" id="h-cmp">0</span></div>
-      <div class="stat"><span class="k">swaps</span><span class="v" id="h-swaps">0</span></div>
-    </div>
-
+    <div id="stats"></div>
     <div id="legend"></div>
+    <div id="notes"></div>
   </div>
 
   <div class="row" style="margin-bottom:2rem">
     <div class="col">
       <div class="panel" style="height:100%">
-        <h2>Index arithmetic</h2>
-        <p class="small muted">No pointers anywhere — the tree structure <em>is</em> the arithmetic. For the node at
-           index <span class="mono">i</span> (0-based):</p>
-        <dl class="kv">
-          <dt>parent</dt><dd>⌊(i − 1) / 2⌋</dd>
-          <dt>left child</dt><dd>2i + 1</dd>
-          <dt>right child</dt><dd>2i + 2</dd>
-          <dt>is a leaf</dt><dd>2i + 1 ≥ n</dd>
-          <dt>first leaf</dt><dd>⌊n / 2⌋</dd>
-          <dt>height</dt><dd>⌊log₂ n⌋</dd>
-        </dl>
-        <p class="small muted" style="margin-bottom:0">Because the tree is <b>complete</b> there are never gaps, so the
-           array is always exactly n long and the height is guaranteed ⌊log₂n⌋ — no rebalancing needed, ever.</p>
+        <h2>Four implementations compared</h2>
+        <div style="overflow-x:auto">
+          <table class="tbl" style="min-width:520px">
+            <tr><th>Operation</th><th>Unsorted list</th><th>Sorted list</th><th>Array heap</th><th>Tree heap</th></tr>
+            <tr><td>insert</td><td class="one">O(1)</td><td>O(n)</td><td class="one">O(log n)</td><td class="one">O(log n)</td></tr>
+            <tr><td>min</td><td>O(n)</td><td class="one">O(1)</td><td class="one">O(1)</td><td class="one">O(1)</td></tr>
+            <tr><td>removeMin</td><td>O(n)</td><td class="one">O(1)</td><td class="one">O(log n)</td><td class="one">O(log n)</td></tr>
+            <tr><td>build from n keys</td><td class="one">O(n)</td><td>O(n log n)</td><td class="one">O(n) bottom-up</td><td>O(n log n)</td></tr>
+            <tr><td>extra space per key</td><td>list link(s)</td><td>list link(s)</td><td class="one">none</td><td>3 pointers</td></tr>
+          </table>
+        </div>
+        <p class="small muted" style="margin:.6rem 0 0">A heap never makes you pay O(n) for anything, which is why
+           it is the default choice. Java's <span class="mono">PriorityQueue</span>, C++'s
+           <span class="mono">std::priority_queue</span> and Python's <span class="mono">heapq</span> are all
+           array-based binary heaps.</p>
       </div>
     </div>
     <div class="col">
       <div class="panel" style="height:100%">
-        <h2>Two invariants, and what they do not say</h2>
-        <p class="small muted"><b>Shape:</b> complete — every level full except the last, which fills left to right.<br>
-           <b>Order:</b> every node is ≤ (min-heap) or ≥ (max-heap) both of its children.</p>
-        <p class="small muted">Heap order is <em>much</em> weaker than a BST's. It says nothing about siblings, and an
-           in-order traversal of a heap is meaningless. That weakness is the point: it is cheap enough to maintain that
-           insert and remove are both O(log n) with tiny constants.</p>
+        <h2>Priority-queue sorting</h2>
         <div style="overflow-x:auto">
-          <table class="tbl" style="min-width:420px">
-            <tr><th>Operation</th><th>Unsorted array</th><th>Sorted array</th><th>Binary heap</th></tr>
-            <tr><td>insert</td><td class="one">O(1)</td><td>O(n)</td><td class="one">O(log n)</td></tr>
-            <tr><td>peek min</td><td>O(n)</td><td class="one">O(1)</td><td class="one">O(1)</td></tr>
-            <tr><td>remove min</td><td>O(n)</td><td class="one">O(1)</td><td class="one">O(log n)</td></tr>
-            <tr><td>build from n items</td><td class="one">O(n)</td><td>O(n log n)</td><td class="one">O(n)</td></tr>
+          <table class="tbl" style="min-width:470px">
+            <tr><th>PQ used</th><th>Sort you get</th><th>Phase 1<br>(n inserts)</th><th>Phase 2<br>(n removeMins)</th><th>Total</th></tr>
+            <tr><td>unsorted list</td><td>selection sort</td><td class="one">O(n)</td><td>O(n²)</td><td>O(n²)</td></tr>
+            <tr><td>sorted list</td><td>insertion sort</td><td>O(n²)</td><td class="one">O(n)</td><td>O(n²)</td></tr>
+            <tr><td>heap</td><td>heap sort</td><td class="one">O(n log n)</td><td class="one">O(n log n)</td><td class="one">O(n log n)</td></tr>
           </table>
         </div>
-        <p class="small muted" style="margin:.5rem 0 0">Both build buttons run on the <em>same</em> values, so the
-           comparison counters are directly comparable. On random input they come out close — repeated insertion is
-           O(n) <em>on average</em>, because most elements stop climbing after a level or two. Press
-           <b>worst-case order</b> to feed insertion the input that forces every element to the root, then run
-           <em>bottom-up heapify</em> on the same 15 values: that is where the Θ(n) versus Θ(n&nbsp;log&nbsp;n)
-           gap actually shows up.</p>
+        <p class="small muted" style="margin:.6rem 0 0">Insertion sort's phase 1 is only O(n) when the input is
+           already sorted, because each insert stops after one comparison. Heap sort can also run <em>in place</em>
+           by storing the heap in the first part of the input array. The Sorting module shows that version.</p>
+        <dl class="kv" style="margin-top:.7rem">
+          <dt>heap order</dt><dd>every node's key ≤ its children's keys</dd>
+          <dt>complete</dt><dd>all levels full except the last, which fills left to right</dd>
+          <dt>height</dt><dd>⌊log₂ n⌋, guaranteed by completeness</dd>
+        </dl>
       </div>
     </div>
   </div>
@@ -114,6 +113,6 @@
 
 <footer class="site"></footer>
 <script src="../assets/js/core.js"></script>
-<script src="../assets/js/heaps.js"></script>
+<script src="../assets/js/pq.js"></script>
 </body>
 </html>

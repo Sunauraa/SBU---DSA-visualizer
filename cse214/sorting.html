@@ -21,8 +21,8 @@
 <div class="wrap">
   <div class="page-head">
     <h1>Sorting Algorithms</h1>
-    <p>Pick an algorithm, feed it an array, and watch every comparison and every write. The pseudocode on the right
-       highlights the line responsible for the current frame.</p>
+    <p>Pick an algorithm, feed it an array, and watch every comparison and every write. The code above the bars
+       highlights the line responsible for the current frame, in pseudocode, Java, C++ or Python.</p>
   </div>
 
   <div id="algo-tabs" class="tabs"></div>
@@ -52,6 +52,8 @@
       <button class="primary" id="btn-run">▶ Run sort</button>
     </div>
 
+    <div id="examples"></div>
+    <div id="code"></div>
     <div class="stage">
       <div class="bars" id="bars"></div>
       <div class="small mono muted" id="heapline" style="display:none;margin-top:.5rem"></div>
@@ -67,21 +69,11 @@
     </div>
 
     <div id="legend"></div>
-  </div>
 
-  <div class="row" style="margin-bottom:2rem">
-    <div class="col" style="flex:1 1 420px">
-      <div class="panel">
-        <div class="panel-title"><h2 id="algo-name">Bubble Sort</h2></div>
-        <div class="complexity" id="algo-big" style="margin-bottom:.7rem"></div>
-        <p class="small" id="algo-blurb" style="color:var(--muted)"></p>
-      </div>
-    </div>
-    <div class="col" style="flex:1 1 340px">
-      <div class="panel">
-        <div class="panel-title"><h2>Code</h2><span class="hint">current line highlighted</span></div>
-        <div id="code"></div>
-      </div>
+    <div style="margin-top:1rem">
+      <div class="panel-title" style="margin-bottom:.4rem"><h2 id="algo-name">Bubble Sort</h2></div>
+      <div class="complexity" id="algo-big" style="margin-bottom:.5rem"></div>
+      <p class="blurb" id="algo-blurb" style="margin:0"></p>
     </div>
   </div>
 

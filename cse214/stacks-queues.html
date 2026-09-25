@@ -21,92 +21,131 @@
 <div class="wrap">
   <div class="page-head">
     <h1>Stacks, Queues &amp; Deques</h1>
-    <p>Three restricted lists. The restriction is the point: by only allowing access at the ends, every operation
-       becomes O(1) with no shifting and no searching.</p>
+    <p>Three restricted lists, each implemented on a plain array. The restriction is the point: allowing access only
+       at the ends makes every operation O(1). The queue shows the one catch, and why it needs a circular array.</p>
   </div>
 
   <div id="tabs" class="tabs"></div>
 
   <div class="panel">
     <div class="toolbar">
-      <div class="field"><label for="val">value</label><input type="number" id="val" placeholder="random"></div>
+      <div class="field" data-tab="stack aqueue cqueue deque compare"><label for="val">value</label><input type="number" id="val" placeholder="random"></div>
+      <div class="sep" data-tab="stack aqueue cqueue deque compare"></div>
 
-      <div class="toolbar" id="tools-stack" style="margin:0">
-        <button class="primary" id="s-push">push</button>
+      <div class="toolbar" data-tab="stack" style="margin:0">
+        <button id="s-push">push</button>
         <button id="s-pop">pop</button>
-        <button id="s-peek">peek</button>
+        <button id="s-peek">top</button>
         <button class="danger" id="s-clear">clear</button>
       </div>
-
-      <div class="toolbar" id="tools-queue" style="margin:0;display:none">
-        <button class="primary" id="q-enq">enqueue</button>
+      <div class="toolbar" data-tab="aqueue" style="margin:0">
+        <button id="a-enq">enqueue</button>
+        <button id="a-deq">dequeue</button>
+        <button class="danger" id="a-clear">clear</button>
+      </div>
+      <div class="toolbar" data-tab="cqueue" style="margin:0">
+        <button id="q-enq">enqueue</button>
         <button id="q-deq">dequeue</button>
-        <button id="q-peek">peek</button>
-        <button id="q-wrap">▶ demo the wrap-around</button>
+        <button id="q-peek">first</button>
         <button class="danger" id="q-clear">clear</button>
       </div>
-
-      <div class="toolbar" id="tools-deque" style="margin:0;display:none">
-        <button class="primary" id="k-af">addFirst</button>
-        <button class="primary" id="k-al">addLast</button>
+      <div class="toolbar" data-tab="deque" style="margin:0">
+        <button id="k-af">addFirst</button>
+        <button id="k-al">addLast</button>
         <button id="k-rf">removeFirst</button>
         <button id="k-rl">removeLast</button>
         <button class="danger" id="k-clear">clear</button>
       </div>
-
-      <div class="toolbar" id="tools-app" style="margin:0;display:none">
-        <input type="text" id="bstr" class="wide" value="{ a[ i ] + (b * c) }">
-        <button class="primary" id="a-brackets">Check brackets</button>
-        <button class="ghost small" data-target="bstr" data-sample="([)]">try ([)]</button>
-        <button class="ghost small" data-target="bstr" data-sample="{[()()]}">try {[()()]}</button>
+      <div class="toolbar" data-tab="compare" style="margin:0">
+        <button id="c-enq">enqueue on both</button>
+        <button id="c-deq">dequeue on both</button>
+        <div class="field">
+          <label for="c-left">left queue</label>
+          <select id="c-left">
+            <option value="shift">front pinned at 0 (shift)</option>
+            <option value="drift">front moves, no wrap</option>
+          </select>
+        </div>
+        <button class="danger" id="c-clear">reset both</button>
+      </div>
+      <div class="toolbar" data-tab="app" style="margin:0">
+        <input type="text" id="bstr" class="wide" value="{ a[ i ] + (b * c) }" aria-label="expression">
+        <button id="ap-brackets">check brackets</button>
         <div class="sep"></div>
-        <input type="text" id="pstr" class="wide" value="3 4 + 2 * 7 -">
-        <button class="primary" id="a-postfix">Evaluate postfix</button>
-        <button class="ghost small" data-target="pstr" data-sample="5 1 2 + 4 * + 3 -">try 5 1 2 + 4 * + 3 −</button>
+        <input type="text" id="pstr" class="wide" value="3 4 + 2 * 7 -" aria-label="postfix expression">
+        <button id="ap-postfix">evaluate postfix</button>
       </div>
     </div>
 
-    <div class="stage" id="stage"></div>
+    <div id="examples"></div>
+
+    <div data-tab="stack aqueue cqueue deque app">
+      <div id="code"></div>
+      <div class="stage" id="stage"></div>
+    </div>
+
+    <div class="compare" data-tab="compare">
+      <div class="pane" id="pane-L">
+        <div class="pane-head"><h3 id="L-title">Plain array queue</h3><span class="tagline" id="L-tag"></span></div>
+        <div id="L-code"></div>
+        <div class="stage" id="L-stage"></div>
+        <div class="pane-note" id="L-note"></div>
+        <div id="L-stats"></div>
+      </div>
+      <div class="pane" id="pane-R">
+        <div class="pane-head"><h3>Circular array queue</h3><span class="tagline">indices wrap with mod</span></div>
+        <div id="R-code"></div>
+        <div class="stage" id="R-stage"></div>
+        <div class="pane-note" id="R-note"></div>
+        <div id="R-stats"></div>
+      </div>
+    </div>
+
     <div id="player"></div>
-    <div class="stats" id="stats"></div>
-    <p class="small" style="color:var(--muted)" id="blurb"></p>
+    <div id="stats" data-tab="stack aqueue cqueue deque app"></div>
+    <div id="legend"></div>
+    <div id="notes"></div>
   </div>
 
   <div class="row" style="margin-bottom:2rem">
     <div class="col">
       <div class="panel" style="height:100%">
         <h2>Why circular?</h2>
-        <p class="small muted">If a queue kept <span class="mono">front</span> pinned at index 0, every dequeue would
-           have to shift the remaining n−1 elements left — O(n) per removal. A circular array instead moves the
-           <em>index</em> and lets it wrap:</p>
-        <div id="cq-code"></div>
-        <p class="small muted" style="margin-bottom:0">Tracking <span class="mono">size</span> (rather than a rear
-           index alone) is what lets you tell a full queue from an empty one — both have
-           <span class="mono">front == (front + size) % cap</span>.</p>
+        <div style="overflow-x:auto">
+          <table class="tbl" style="min-width:470px">
+            <tr><th>Array queue strategy</th><th>enqueue</th><th>dequeue</th><th>problem</th></tr>
+            <tr><td>front pinned at index 0</td><td class="one">O(1)</td><td>O(n)</td><td>every dequeue shifts n − 1 elements</td></tr>
+            <tr><td>front index moves, no wrap</td><td class="one">O(1)</td><td class="one">O(1)</td><td>freed slots are never reused: “full” with empty space</td></tr>
+            <tr><td>circular (front + size, mod N)</td><td class="one">O(1)</td><td class="one">O(1)</td><td>none. Every slot is reusable.</td></tr>
+          </table>
+        </div>
+        <p class="small muted" style="margin-bottom:0">The circular array keeps the cheap “move an index” dequeue of the
+           second strategy, and fixes its flaw by letting the index wrap from N − 1 back to 0. Tracking
+           <span class="mono">size</span> as well as <span class="mono">front</span> tells a full queue apart from an
+           empty one, because both have <span class="mono">front == (front + size) mod N</span>. Open the <b>Why
+           circular?</b> tab to run the plain-array and circular versions side by side.</p>
       </div>
     </div>
     <div class="col">
       <div class="panel" style="height:100%">
-        <h2>Where each one shows up</h2>
-        <dl class="kv">
-          <dt>Stack</dt><dd>call frames, undo/redo, DFS, bracket &amp; tag matching, postfix evaluation, backtracking</dd>
-          <dt>Queue</dt><dd>BFS, print/task scheduling, buffers, producer–consumer, level-order traversal</dd>
-          <dt>Deque</dt><dd>sliding-window maximum, work stealing, palindrome checks, "undo both ends" editors</dd>
-        </dl>
-        <hr class="hr" style="margin:1rem 0">
-        <h3 style="font-size:.95rem;margin:0 0 .4rem">Cost of every operation</h3>
+        <h2>Cost of every operation</h2>
         <div style="overflow-x:auto">
           <table class="tbl">
-            <tr><th></th><th>Stack</th><th>Queue</th><th>Deque</th></tr>
+            <tr><th></th><th>Stack (array)</th><th>Queue (circular)</th><th>Deque (circular)</th></tr>
             <tr><td>insert front</td><td>–</td><td>–</td><td class="one">O(1)</td></tr>
-            <tr><td>insert rear</td><td class="one">O(1)*</td><td class="one">O(1)*</td><td class="one">O(1)*</td></tr>
+            <tr><td>insert rear / push</td><td class="one">O(1)*</td><td class="one">O(1)*</td><td class="one">O(1)*</td></tr>
             <tr><td>remove front</td><td>–</td><td class="one">O(1)</td><td class="one">O(1)</td></tr>
-            <tr><td>remove rear</td><td class="one">O(1)</td><td>–</td><td class="one">O(1)</td></tr>
-            <tr><td>search</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr>
+            <tr><td>remove rear / pop</td><td class="one">O(1)</td><td>–</td><td class="one">O(1)</td></tr>
+            <tr><td>peek</td><td class="one">O(1)</td><td class="one">O(1)</td><td class="one">O(1)</td></tr>
           </table>
         </div>
-        <p class="small muted" style="margin:.5rem 0 0">* amortised, if the backing array grows by doubling. For a
-           stack "rear" is the top.</p>
+        <p class="small muted" style="margin:.5rem 0 .7rem">* O(1) amortised if the array doubles when full;
+           these demos use a fixed capacity of 8 so you can see “full”.</p>
+        <dl class="kv">
+          <dt>Stack</dt><dd>call frames, undo/redo, DFS, bracket matching, postfix evaluation</dd>
+          <dt>Queue</dt><dd>BFS, print/task scheduling, buffers, level-order traversal</dd>
+          <dt>Deque</dt><dd>sliding-window maximum, work stealing, palindrome checks</dd>
+        </dl>
       </div>
     </div>
   </div>

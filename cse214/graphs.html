@@ -21,14 +21,13 @@
 <div class="wrap">
   <div class="page-head">
     <h1>Graphs</h1>
-    <p>Build a graph by clicking, then traverse it. The adjacency matrix and adjacency list on the right are the same
-       graph in two representations, and they highlight in step with the search.</p>
+    <p>Build a graph by clicking and drag vertices wherever you like, even mid-traversal. The adjacency matrix and
+       adjacency list are the same graph in two representations, and they highlight in step with the search.</p>
   </div>
 
   <div class="panel">
     <div class="toolbar">
       <button data-tool="add" class="active">✚ add / connect</button>
-      <button data-tool="move">✥ move</button>
       <button data-tool="del">✕ delete</button>
       <div class="sep"></div>
       <label class="field small" style="cursor:pointer"><input type="checkbox" id="directed" style="width:auto"> directed</label>
@@ -46,13 +45,15 @@
       <button class="danger" id="btn-clear">clear</button>
       <div class="sep"></div>
       <div class="field"><label for="start">start</label><select id="start" style="width:4.5rem"></select></div>
-      <button class="primary" id="btn-bfs">▶ BFS</button>
-      <button class="primary" id="btn-dfs">▶ DFS</button>
+      <button id="btn-bfs">▶ BFS</button>
+      <button id="btn-dfs">▶ DFS</button>
       <button id="btn-forest">DFS forest</button>
     </div>
 
-    <p class="small muted" id="tool-hint" style="margin:.1rem 0 .7rem">Click empty space to <b>add a vertex</b>; click
-       one vertex then another to <b>toggle an edge</b>.</p>
+    <div id="examples"></div>
+    <div id="code"></div>
+    <p class="small muted" id="tool-hint" style="margin:.1rem 0 .7rem">Click empty space to <b>add a vertex</b>. Click
+       one vertex, then another, to <b>toggle an edge</b>. <b>Drag</b> any vertex to move it.</p>
 
     <div class="row">
       <div class="col" style="flex:2 1 520px">
@@ -78,7 +79,7 @@
     </div>
 
     <div id="legend"></div>
-    <p class="small" style="color:var(--muted)" id="algo-explain"></p>
+    <p class="blurb" id="algo-explain"></p>
   </div>
 
   <div class="row" style="margin-bottom:2rem">
@@ -96,8 +97,6 @@
             <tr><td>tree edges</td><td>shortest-path tree</td><td>DFS tree / forest</td></tr>
           </table>
         </div>
-        <div id="bfs-code" style="margin-top:.8rem"></div>
-        <div id="dfs-code" style="margin-top:.5rem"></div>
       </div>
     </div>
     <div class="col">

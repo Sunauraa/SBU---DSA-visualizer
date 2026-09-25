@@ -35,10 +35,10 @@
       </div>
 
       <div class="toolbar" id="tools-trav" style="margin:0">
-        <button class="primary" id="tr-pre">pre-order</button>
-        <button class="primary" id="tr-in">in-order</button>
-        <button class="primary" id="tr-post">post-order</button>
-        <button class="primary" id="tr-level">level-order</button>
+        <button id="tr-pre">pre-order</button>
+        <button id="tr-in">in-order</button>
+        <button id="tr-post">post-order</button>
+        <button id="tr-level">level-order</button>
         <div class="sep"></div>
         <button id="tr-perfect">perfect tree</button>
         <button id="tr-rand">↻ random</button>
@@ -47,7 +47,7 @@
       </div>
 
       <div class="toolbar" id="tools-bst" style="margin:0;display:none">
-        <button class="primary" id="bst-insert">insert</button>
+        <button id="bst-insert">insert</button>
         <button id="bst-search">search</button>
         <button id="bst-delete">delete</button>
         <div class="sep"></div>
@@ -57,7 +57,7 @@
       </div>
 
       <div class="toolbar" id="tools-avl" style="margin:0;display:none">
-        <button class="primary" id="avl-insert">insert</button>
+        <button id="avl-insert">insert</button>
         <button id="avl-search">search</button>
         <button id="avl-delete">delete</button>
         <div class="sep"></div>
@@ -67,7 +67,7 @@
       </div>
 
       <div class="toolbar" id="tools-t24" style="margin:0;display:none">
-        <button class="primary" id="t24-insert">insert</button>
+        <button id="t24-insert">insert</button>
         <button id="t24-search">search</button>
         <button id="t24-delete">delete</button>
         <div class="sep"></div>
@@ -77,7 +77,7 @@
       </div>
 
       <div class="toolbar" id="tools-btree" style="margin:0;display:none">
-        <button class="primary" id="btree-insert">insert</button>
+        <button id="btree-insert">insert</button>
         <button id="btree-search">search</button>
         <button id="btree-delete">delete</button>
         <div class="sep"></div>
@@ -87,6 +87,8 @@
       </div>
     </div>
 
+    <div id="examples"></div>
+    <div id="code"></div>
     <div class="stage" id="tree-view"></div>
     <div id="output" style="margin-top:.8rem"></div>
     <div id="player"></div>
@@ -100,7 +102,7 @@
     </div>
 
     <div id="legend"></div>
-    <p class="small" style="color:var(--muted)" id="blurb"></p>
+    <p class="blurb" id="blurb"></p>
   </div>
 
   <div class="row" style="margin-bottom:1.1rem">

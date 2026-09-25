@@ -8,515 +8,468 @@
   const D = window.DSA;
 
   /* ---------- listings ----------------------------------------
-     Frames record a PSEUDOCODE line number, so every other language
-     ships a `map` from pseudocode line → line in that listing.
-     Leave a map out when the two line up one-for-one.
+     Lines ending "@@name" are anchors. A frame names the anchor(s)
+     of the line(s) it is executing, and every language lights its
+     own equivalent lines.
      ------------------------------------------------------------ */
   const CODE = {
     bubble: {
       pseudo: [
         "bubbleSort(A):",
-        "  for i ← n-1 down to 1",
-        "    swapped ← false",
-        "    for j ← 0 to i-1",
-        "      // compare neighbours",
-        "      if A[j] > A[j+1]",
-        "        swap A[j], A[j+1]",
-        "        swapped ← true",
-        "    if not swapped: break   // already sorted",
+        "  for i ← n-1 down to 1 @@outer",
+        "    swapped ← false @@reset",
+        "    for j ← 0 to i-1 @@inner",
+        "      if A[j] > A[j+1]              // compare neighbours @@cmp",
+        "        swap A[j], A[j+1] @@swap",
+        "        swapped ← true @@swap",
+        "    if not swapped: break           // no swaps ⇒ already sorted @@exit",
       ],
       java: [
         "static void bubbleSort(int[] a) {",
-        "  for (int i = a.length - 1; i >= 1; i--) {",
-        "    boolean swapped = false;",
-        "    for (int j = 0; j < i; j++) {",
-        "      // compare neighbours",
-        "      if (a[j] > a[j + 1]) {",
-        "        int t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;",
-        "        swapped = true;",
+        "  for (int i = a.length - 1; i >= 1; i--) { @@outer",
+        "    boolean swapped = false; @@reset",
+        "    for (int j = 0; j < i; j++) { @@inner",
+        "      if (a[j] > a[j + 1]) { @@cmp",
+        "        int t = a[j]; a[j] = a[j + 1]; a[j + 1] = t; @@swap",
+        "        swapped = true; @@swap",
         "      }",
         "    }",
-        "    if (!swapped) break;    // already sorted",
+        "    if (!swapped) break; @@exit",
         "  }",
         "}",
       ],
       cpp: [
         "void bubbleSort(vector<int>& a) {",
-        "  for (int i = (int)a.size() - 1; i >= 1; i--) {",
-        "    bool swapped = false;",
-        "    for (int j = 0; j < i; j++) {",
-        "      // compare neighbours",
-        "      if (a[j] > a[j + 1]) {",
-        "        swap(a[j], a[j + 1]);",
-        "        swapped = true;",
+        "  for (int i = (int)a.size() - 1; i >= 1; i--) { @@outer",
+        "    bool swapped = false; @@reset",
+        "    for (int j = 0; j < i; j++) { @@inner",
+        "      if (a[j] > a[j + 1]) { @@cmp",
+        "        swap(a[j], a[j + 1]); @@swap",
+        "        swapped = true; @@swap",
         "      }",
         "    }",
-        "    if (!swapped) break;    // already sorted",
+        "    if (!swapped) break; @@exit",
         "  }",
         "}",
       ],
       python: [
         "def bubble_sort(a):",
-        "  for i in range(len(a) - 1, 0, -1):",
-        "    swapped = False",
-        "    for j in range(i):",
-        "      # compare neighbours",
-        "      if a[j] > a[j + 1]:",
-        "        a[j], a[j + 1] = a[j + 1], a[j]",
-        "        swapped = True",
-        "    if not swapped:         # already sorted",
-        "      break",
+        "  for i in range(len(a) - 1, 0, -1): @@outer",
+        "    swapped = False @@reset",
+        "    for j in range(i): @@inner",
+        "      if a[j] > a[j + 1]: @@cmp",
+        "        a[j], a[j + 1] = a[j + 1], a[j] @@swap",
+        "        swapped = True @@swap",
+        "    if not swapped: @@exit",
+        "      break @@exit",
       ],
-      map: {
-        java: [0, 1, 2, 3, 4, 5, 6, 7, 10],
-        cpp: [0, 1, 2, 3, 4, 5, 6, 7, 10],
-      },
     },
 
     selection: {
       pseudo: [
         "selectionSort(A):",
-        "  for i ← 0 to n-2",
-        "    min ← i",
-        "    for j ← i+1 to n-1",
-        "      if A[j] < A[min]",
-        "        min ← j",
-        "    swap A[i], A[min]",
+        "  for i ← 0 to n-2 @@outer",
+        "    min ← i @@init",
+        "    for j ← i+1 to n-1 @@inner",
+        "      if A[j] < A[min] @@cmp",
+        "        min ← j @@upd",
+        "    if min ≠ i: swap A[i], A[min] @@swap",
       ],
       java: [
         "static void selectionSort(int[] a) {",
-        "  for (int i = 0; i < a.length - 1; i++) {",
-        "    int min = i;",
-        "    for (int j = i + 1; j < a.length; j++)",
-        "      if (a[j] < a[min])",
-        "        min = j;",
-        "    int t = a[i]; a[i] = a[min]; a[min] = t;",
+        "  for (int i = 0; i < a.length - 1; i++) { @@outer",
+        "    int min = i; @@init",
+        "    for (int j = i + 1; j < a.length; j++) @@inner",
+        "      if (a[j] < a[min]) @@cmp",
+        "        min = j; @@upd",
+        "    if (min != i) { int t = a[i]; a[i] = a[min]; a[min] = t; } @@swap",
         "  }",
         "}",
       ],
       cpp: [
         "void selectionSort(vector<int>& a) {",
-        "  for (int i = 0; i + 1 < (int)a.size(); i++) {",
-        "    int min = i;",
-        "    for (int j = i + 1; j < (int)a.size(); j++)",
-        "      if (a[j] < a[min])",
-        "        min = j;",
-        "    swap(a[i], a[min]);",
+        "  for (int i = 0; i + 1 < (int)a.size(); i++) { @@outer",
+        "    int min = i; @@init",
+        "    for (int j = i + 1; j < (int)a.size(); j++) @@inner",
+        "      if (a[j] < a[min]) @@cmp",
+        "        min = j; @@upd",
+        "    if (min != i) swap(a[i], a[min]); @@swap",
         "  }",
         "}",
       ],
       python: [
         "def selection_sort(a):",
-        "  for i in range(len(a) - 1):",
-        "    m = i",
-        "    for j in range(i + 1, len(a)):",
-        "      if a[j] < a[m]:",
-        "        m = j",
-        "    a[i], a[m] = a[m], a[i]",
+        "  for i in range(len(a) - 1): @@outer",
+        "    m = i @@init",
+        "    for j in range(i + 1, len(a)): @@inner",
+        "      if a[j] < a[m]: @@cmp",
+        "        m = j @@upd",
+        "    if m != i: @@swap",
+        "      a[i], a[m] = a[m], a[i] @@swap",
       ],
     },
 
     insertion: {
       pseudo: [
         "insertionSort(A):",
-        "  for i ← 1 to n-1",
-        "    key ← A[i];  j ← i-1",
-        "    while j ≥ 0 and A[j] > key",
-        "      A[j+1] ← A[j]      // shift right",
-        "      j ← j-1",
-        "    A[j+1] ← key       // drop it in",
+        "  for i ← 1 to n-1 @@outer",
+        "    key ← A[i];  j ← i-1 @@key",
+        "    while j ≥ 0 and A[j] > key @@cmp",
+        "      A[j+1] ← A[j]        // shift right @@shift",
+        "      j ← j-1 @@shift",
+        "    A[j+1] ← key           // drop it in @@drop",
       ],
       java: [
         "static void insertionSort(int[] a) {",
-        "  for (int i = 1; i < a.length; i++) {",
-        "    int key = a[i], j = i - 1;",
-        "    while (j >= 0 && a[j] > key) {",
-        "      a[j + 1] = a[j];      // shift right",
-        "      j--;",
+        "  for (int i = 1; i < a.length; i++) { @@outer",
+        "    int key = a[i], j = i - 1; @@key",
+        "    while (j >= 0 && a[j] > key) { @@cmp",
+        "      a[j + 1] = a[j];      // shift right @@shift",
+        "      j--; @@shift",
         "    }",
-        "    a[j + 1] = key;         // drop it in",
+        "    a[j + 1] = key;         // drop it in @@drop",
         "  }",
         "}",
       ],
       cpp: [
         "void insertionSort(vector<int>& a) {",
-        "  for (int i = 1; i < (int)a.size(); i++) {",
-        "    int key = a[i], j = i - 1;",
-        "    while (j >= 0 && a[j] > key) {",
-        "      a[j + 1] = a[j];      // shift right",
-        "      j--;",
+        "  for (int i = 1; i < (int)a.size(); i++) { @@outer",
+        "    int key = a[i], j = i - 1; @@key",
+        "    while (j >= 0 && a[j] > key) { @@cmp",
+        "      a[j + 1] = a[j];      // shift right @@shift",
+        "      j--; @@shift",
         "    }",
-        "    a[j + 1] = key;         // drop it in",
+        "    a[j + 1] = key;         // drop it in @@drop",
         "  }",
         "}",
       ],
       python: [
         "def insertion_sort(a):",
-        "  for i in range(1, len(a)):",
-        "    key, j = a[i], i - 1",
-        "    while j >= 0 and a[j] > key:",
-        "      a[j + 1] = a[j]       # shift right",
-        "      j -= 1",
-        "    a[j + 1] = key          # drop it in",
+        "  for i in range(1, len(a)): @@outer",
+        "    key, j = a[i], i - 1 @@key",
+        "    while j >= 0 and a[j] > key: @@cmp",
+        "      a[j + 1] = a[j]       # shift right @@shift",
+        "      j -= 1 @@shift",
+        "    a[j + 1] = key          # drop it in @@drop",
       ],
-      map: {
-        java: [0, 1, 2, 3, 4, 5, 7],
-        cpp: [0, 1, 2, 3, 4, 5, 7],
-      },
     },
 
     heap: {
       pseudo: [
         "heapSort(A):",
-        "  // 1. build a max-heap bottom-up",
-        "  for i ← ⌊n/2⌋-1 down to 0",
-        "    downHeap(A, i, n)",
-        "  // 2. pull the max to the back",
-        "  for end ← n-1 down to 1",
-        "    swap A[0], A[end]",
-        "    downHeap(A, 0, end)",
+        "  for i ← ⌊n/2⌋-1 down to 0         // phase 1: build a max-heap @@build",
+        "    downHeap(A, i, n) @@bcall",
+        "  for end ← n-1 down to 1            // phase 2: extract the max @@extract",
+        "    swap A[0], A[end] @@eswap",
+        "    downHeap(A, 0, end) @@ecall",
         "",
         "downHeap(A, i, size):",
-        "  while 2i+1 < size",
-        "    c ← index of larger child",
-        "    if A[i] ≥ A[c]: break",
-        "    swap A[i], A[c];  i ← c",
+        "  while 2i+1 < size                  // i still has a child @@dloop",
+        "    c ← the larger child of i @@child",
+        "    if A[i] ≥ A[c]: break            // heap order holds @@dcmp",
+        "    swap A[i], A[c];  i ← c @@dswap",
       ],
       java: [
         "static void heapSort(int[] a) {",
-        "  // 1. build a max-heap bottom-up",
-        "  for (int i = a.length / 2 - 1; i >= 0; i--)",
-        "    downHeap(a, i, a.length);",
-        "  // 2. pull the max to the back",
-        "  for (int end = a.length - 1; end >= 1; end--) {",
-        "    int t = a[0]; a[0] = a[end]; a[end] = t;",
-        "    downHeap(a, 0, end);",
+        "  for (int i = a.length / 2 - 1; i >= 0; i--) @@build",
+        "    downHeap(a, i, a.length); @@bcall",
+        "  for (int end = a.length - 1; end >= 1; end--) { @@extract",
+        "    int t = a[0]; a[0] = a[end]; a[end] = t; @@eswap",
+        "    downHeap(a, 0, end); @@ecall",
         "  }",
         "}",
         "",
         "static void downHeap(int[] a, int i, int size) {",
-        "  while (2 * i + 1 < size) {",
-        "    int c = 2 * i + 1;",
-        "    if (c + 1 < size && a[c + 1] > a[c]) c++;",
-        "    if (a[i] >= a[c]) break;",
-        "    int t = a[i]; a[i] = a[c]; a[c] = t;",
-        "    i = c;",
+        "  while (2 * i + 1 < size) { @@dloop",
+        "    int c = 2 * i + 1; @@child",
+        "    if (c + 1 < size && a[c + 1] > a[c]) c++; @@child",
+        "    if (a[i] >= a[c]) break; @@dcmp",
+        "    int t = a[i]; a[i] = a[c]; a[c] = t; @@dswap",
+        "    i = c; @@dswap",
         "  }",
         "}",
       ],
       cpp: [
-        "void downHeap(vector<int>& a, int i, int size) {",
-        "  while (2 * i + 1 < size) {",
-        "    int c = 2 * i + 1;",
-        "    if (c + 1 < size && a[c + 1] > a[c]) c++;",
-        "    if (a[i] >= a[c]) break;",
-        "    swap(a[i], a[c]);",
-        "    i = c;",
+        "void heapSort(vector<int>& a) {",
+        "  for (int i = (int)a.size() / 2 - 1; i >= 0; i--) @@build",
+        "    downHeap(a, i, a.size()); @@bcall",
+        "  for (int end = (int)a.size() - 1; end >= 1; end--) { @@extract",
+        "    swap(a[0], a[end]); @@eswap",
+        "    downHeap(a, 0, end); @@ecall",
         "  }",
         "}",
         "",
-        "void heapSort(vector<int>& a) {",
-        "  // 1. build a max-heap bottom-up",
-        "  for (int i = (int)a.size() / 2 - 1; i >= 0; i--)",
-        "    downHeap(a, i, a.size());",
-        "  // 2. pull the max to the back",
-        "  for (int end = (int)a.size() - 1; end >= 1; end--) {",
-        "    swap(a[0], a[end]);",
-        "    downHeap(a, 0, end);",
+        "void downHeap(vector<int>& a, int i, int size) {",
+        "  while (2 * i + 1 < size) { @@dloop",
+        "    int c = 2 * i + 1; @@child",
+        "    if (c + 1 < size && a[c + 1] > a[c]) c++; @@child",
+        "    if (a[i] >= a[c]) break; @@dcmp",
+        "    swap(a[i], a[c]); @@dswap",
+        "    i = c; @@dswap",
         "  }",
         "}",
       ],
       python: [
         "def heap_sort(a):",
-        "  # 1. build a max-heap bottom-up",
-        "  for i in range(len(a) // 2 - 1, -1, -1):",
-        "    down_heap(a, i, len(a))",
-        "  # 2. pull the max to the back",
-        "  for end in range(len(a) - 1, 0, -1):",
-        "    a[0], a[end] = a[end], a[0]",
-        "    down_heap(a, 0, end)",
+        "  for i in range(len(a) // 2 - 1, -1, -1): @@build",
+        "    down_heap(a, i, len(a)) @@bcall",
+        "  for end in range(len(a) - 1, 0, -1): @@extract",
+        "    a[0], a[end] = a[end], a[0] @@eswap",
+        "    down_heap(a, 0, end) @@ecall",
         "",
         "def down_heap(a, i, size):",
-        "  while 2 * i + 1 < size:",
-        "    c = 2 * i + 1",
-        "    if c + 1 < size and a[c + 1] > a[c]:",
-        "      c += 1",
-        "    if a[i] >= a[c]:",
-        "      break",
-        "    a[i], a[c] = a[c], a[i]",
-        "    i = c",
+        "  while 2 * i + 1 < size: @@dloop",
+        "    c = 2 * i + 1 @@child",
+        "    if c + 1 < size and a[c + 1] > a[c]: @@child",
+        "      c += 1 @@child",
+        "    if a[i] >= a[c]: @@dcmp",
+        "      break @@dcmp",
+        "    a[i], a[c] = a[c], a[i] @@dswap",
+        "    i = c @@dswap",
       ],
-      map: {
-        java: [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 15, 16],
-        cpp: [10, 11, 12, 13, 14, 15, 16, 17, 9, 0, 1, 2, 4, 5],
-        python: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 16],
-      },
     },
 
     merge: {
       pseudo: [
-        "mergeSort(A, lo, hi):",
-        "  if lo ≥ hi: return       // size ≤ 1",
-        "  mid ← ⌊(lo+hi)/2⌋",
-        "  mergeSort(A, lo, mid)",
-        "  mergeSort(A, mid+1, hi)",
-        "  merge(A, lo, mid, hi)",
+        "mergeSort(A, lo, hi): @@fn",
+        "  if lo ≥ hi: return                 // 0 or 1 element @@base",
+        "  mid ← ⌊(lo+hi)/2⌋ @@mid",
+        "  mergeSort(A, lo, mid) @@rec1",
+        "  mergeSort(A, mid+1, hi) @@rec2",
+        "  merge(A, lo, mid, hi) @@mcall",
         "",
         "merge(A, lo, mid, hi):",
-        "  L ← A[lo..mid],  R ← A[mid+1..hi]",
-        "  i ← 0, j ← 0, k ← lo",
-        "  while i < |L| and j < |R|",
-        "    A[k++] ← (L[i] ≤ R[j]) ? L[i++] : R[j++]",
-        "  copy the remaining side back into A",
+        "  L ← A[lo..mid];  R ← A[mid+1..hi] @@copy",
+        "  i ← 0;  j ← 0;  k ← lo @@copy",
+        "  while i < |L| and j < |R|: @@take",
+        "    A[k++] ← (L[i] ≤ R[j]) ? L[i++] : R[j++] @@take",
+        "  copy whatever is left of L or R into A @@rest",
       ],
       java: [
-        "static void mergeSort(int[] a, int lo, int hi) {",
-        "  if (lo >= hi) return;                // size <= 1",
-        "  int mid = (lo + hi) / 2;",
-        "  mergeSort(a, lo, mid);",
-        "  mergeSort(a, mid + 1, hi);",
-        "  merge(a, lo, mid, hi);",
+        "static void mergeSort(int[] a, int lo, int hi) { @@fn",
+        "  if (lo >= hi) return; @@base",
+        "  int mid = (lo + hi) / 2; @@mid",
+        "  mergeSort(a, lo, mid); @@rec1",
+        "  mergeSort(a, mid + 1, hi); @@rec2",
+        "  merge(a, lo, mid, hi); @@mcall",
         "}",
         "",
         "static void merge(int[] a, int lo, int mid, int hi) {",
-        "  int[] L = Arrays.copyOfRange(a, lo, mid + 1);",
-        "  int[] R = Arrays.copyOfRange(a, mid + 1, hi + 1);",
-        "  int i = 0, j = 0, k = lo;",
-        "  while (i < L.length && j < R.length)",
-        "    a[k++] = (L[i] <= R[j]) ? L[i++] : R[j++];",
-        "  while (i < L.length) a[k++] = L[i++];",
-        "  while (j < R.length) a[k++] = R[j++];",
+        "  int[] L = Arrays.copyOfRange(a, lo, mid + 1); @@copy",
+        "  int[] R = Arrays.copyOfRange(a, mid + 1, hi + 1); @@copy",
+        "  int i = 0, j = 0, k = lo; @@copy",
+        "  while (i < L.length && j < R.length) @@take",
+        "    a[k++] = (L[i] <= R[j]) ? L[i++] : R[j++]; @@take",
+        "  while (i < L.length) a[k++] = L[i++]; @@rest",
+        "  while (j < R.length) a[k++] = R[j++]; @@rest",
         "}",
       ],
       cpp: [
-        "void merge(vector<int>& a, int lo, int mid, int hi) {",
-        "  vector<int> L(a.begin() + lo, a.begin() + mid + 1);",
-        "  vector<int> R(a.begin() + mid + 1, a.begin() + hi + 1);",
-        "  int i = 0, j = 0, k = lo;",
-        "  while (i < (int)L.size() && j < (int)R.size())",
-        "    a[k++] = (L[i] <= R[j]) ? L[i++] : R[j++];",
-        "  while (i < (int)L.size()) a[k++] = L[i++];",
-        "  while (j < (int)R.size()) a[k++] = R[j++];",
+        "void mergeSort(vector<int>& a, int lo, int hi) { @@fn",
+        "  if (lo >= hi) return; @@base",
+        "  int mid = (lo + hi) / 2; @@mid",
+        "  mergeSort(a, lo, mid); @@rec1",
+        "  mergeSort(a, mid + 1, hi); @@rec2",
+        "  merge(a, lo, mid, hi); @@mcall",
         "}",
         "",
-        "void mergeSort(vector<int>& a, int lo, int hi) {",
-        "  if (lo >= hi) return;                // size <= 1",
-        "  int mid = (lo + hi) / 2;",
-        "  mergeSort(a, lo, mid);",
-        "  mergeSort(a, mid + 1, hi);",
-        "  merge(a, lo, mid, hi);",
+        "void merge(vector<int>& a, int lo, int mid, int hi) {",
+        "  vector<int> L(a.begin() + lo, a.begin() + mid + 1); @@copy",
+        "  vector<int> R(a.begin() + mid + 1, a.begin() + hi + 1); @@copy",
+        "  int i = 0, j = 0, k = lo; @@copy",
+        "  while (i < (int)L.size() && j < (int)R.size()) @@take",
+        "    a[k++] = (L[i] <= R[j]) ? L[i++] : R[j++]; @@take",
+        "  while (i < (int)L.size()) a[k++] = L[i++]; @@rest",
+        "  while (j < (int)R.size()) a[k++] = R[j++]; @@rest",
         "}",
       ],
       python: [
-        "def merge_sort(a, lo, hi):",
-        "  if lo >= hi:                       # size <= 1",
-        "    return",
-        "  mid = (lo + hi) // 2",
-        "  merge_sort(a, lo, mid)",
-        "  merge_sort(a, mid + 1, hi)",
-        "  merge(a, lo, mid, hi)",
+        "def merge_sort(a, lo, hi): @@fn",
+        "  if lo >= hi: @@base",
+        "    return @@base",
+        "  mid = (lo + hi) // 2 @@mid",
+        "  merge_sort(a, lo, mid) @@rec1",
+        "  merge_sort(a, mid + 1, hi) @@rec2",
+        "  merge(a, lo, mid, hi) @@mcall",
         "",
         "def merge(a, lo, mid, hi):",
-        "  L, R = a[lo:mid + 1], a[mid + 1:hi + 1]",
-        "  i = j = 0",
-        "  k = lo",
-        "  while i < len(L) and j < len(R):",
-        "    if L[i] <= R[j]:",
-        "      a[k], i = L[i], i + 1",
-        "    else:",
-        "      a[k], j = R[j], j + 1",
-        "    k += 1",
-        "  a[k:hi + 1] = L[i:] + R[j:]        # whichever side is left",
+        "  L, R = a[lo:mid + 1], a[mid + 1:hi + 1] @@copy",
+        "  i, j, k = 0, 0, lo @@copy",
+        "  while i < len(L) and j < len(R): @@take",
+        "    if L[i] <= R[j]: @@take",
+        "      a[k], i = L[i], i + 1 @@take",
+        "    else: @@take",
+        "      a[k], j = R[j], j + 1 @@take",
+        "    k += 1 @@take",
+        "  a[k:hi + 1] = L[i:] + R[j:]        # whichever side is left @@rest",
       ],
-      map: {
-        java: [0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14],
-        cpp: [10, 11, 12, 13, 14, 15, 9, 0, 1, 3, 4, 5, 6],
-        python: [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 18],
-      },
     },
 
     quick: {
       pseudo: [
-        "quickSort(A, lo, hi):",
-        "  if lo ≥ hi: return",
-        "  p ← partition(A, lo, hi)",
-        "  quickSort(A, lo, p-1)",
-        "  quickSort(A, p+1, hi)",
+        "quickSort(A, lo, hi): @@fn",
+        "  if lo ≥ hi: return @@base",
+        "  p ← partition(A, lo, hi) @@part",
+        "  quickSort(A, lo, p-1) @@rec1",
+        "  quickSort(A, p+1, hi) @@rec2",
         "",
-        "partition(A, lo, hi):   // Lomuto, pivot = A[hi]",
-        "  pivot ← A[hi];  i ← lo",
-        "  for j ← lo to hi-1",
-        "    if A[j] < pivot",
-        "      swap A[i], A[j];  i ← i+1",
-        "  swap A[i], A[hi]      // pivot lands at i",
-        "  return i",
+        "partition(A, lo, hi):                // Lomuto, pivot = A[hi]",
+        "  pivot ← A[hi];  i ← lo @@pivot",
+        "  for j ← lo to hi-1 @@ploop",
+        "    if A[j] < pivot @@pcmp",
+        "      swap A[i], A[j];  i ← i+1 @@pswap",
+        "  swap A[i], A[hi]                   // pivot lands at i @@pfinal",
+        "  return i @@pfinal",
       ],
       java: [
-        "static void quickSort(int[] a, int lo, int hi) {",
-        "  if (lo >= hi) return;",
-        "  int p = partition(a, lo, hi);",
-        "  quickSort(a, lo, p - 1);",
-        "  quickSort(a, p + 1, hi);",
+        "static void quickSort(int[] a, int lo, int hi) { @@fn",
+        "  if (lo >= hi) return; @@base",
+        "  int p = partition(a, lo, hi); @@part",
+        "  quickSort(a, lo, p - 1); @@rec1",
+        "  quickSort(a, p + 1, hi); @@rec2",
         "}",
         "",
         "static int partition(int[] a, int lo, int hi) {   // Lomuto",
-        "  int pivot = a[hi], i = lo;",
-        "  for (int j = lo; j < hi; j++)",
-        "    if (a[j] < pivot) {",
-        "      int t = a[i]; a[i] = a[j]; a[j] = t;  i++;",
+        "  int pivot = a[hi], i = lo; @@pivot",
+        "  for (int j = lo; j < hi; j++) @@ploop",
+        "    if (a[j] < pivot) { @@pcmp",
+        "      int t = a[i]; a[i] = a[j]; a[j] = t;  i++; @@pswap",
         "    }",
-        "  int tmp = a[i]; a[i] = a[hi]; a[hi] = tmp;  // pivot to i",
-        "  return i;",
+        "  int t = a[i]; a[i] = a[hi]; a[hi] = t;   // pivot to i @@pfinal",
+        "  return i; @@pfinal",
         "}",
       ],
       cpp: [
-        "int partition(vector<int>& a, int lo, int hi) {   // Lomuto",
-        "  int pivot = a[hi], i = lo;",
-        "  for (int j = lo; j < hi; j++)",
-        "    if (a[j] < pivot) {",
-        "      swap(a[i], a[j]);  i++;",
-        "    }",
-        "  swap(a[i], a[hi]);                // pivot lands at i",
-        "  return i;",
+        "void quickSort(vector<int>& a, int lo, int hi) { @@fn",
+        "  if (lo >= hi) return; @@base",
+        "  int p = partition(a, lo, hi); @@part",
+        "  quickSort(a, lo, p - 1); @@rec1",
+        "  quickSort(a, p + 1, hi); @@rec2",
         "}",
         "",
-        "void quickSort(vector<int>& a, int lo, int hi) {",
-        "  if (lo >= hi) return;",
-        "  int p = partition(a, lo, hi);",
-        "  quickSort(a, lo, p - 1);",
-        "  quickSort(a, p + 1, hi);",
+        "int partition(vector<int>& a, int lo, int hi) {   // Lomuto",
+        "  int pivot = a[hi], i = lo; @@pivot",
+        "  for (int j = lo; j < hi; j++) @@ploop",
+        "    if (a[j] < pivot) { @@pcmp",
+        "      swap(a[i], a[j]);  i++; @@pswap",
+        "    }",
+        "  swap(a[i], a[hi]);                // pivot lands at i @@pfinal",
+        "  return i; @@pfinal",
         "}",
       ],
       python: [
-        "def quick_sort(a, lo, hi):",
-        "  if lo >= hi:",
-        "    return",
-        "  p = partition(a, lo, hi)",
-        "  quick_sort(a, lo, p - 1)",
-        "  quick_sort(a, p + 1, hi)",
+        "def quick_sort(a, lo, hi): @@fn",
+        "  if lo >= hi: @@base",
+        "    return @@base",
+        "  p = partition(a, lo, hi) @@part",
+        "  quick_sort(a, lo, p - 1) @@rec1",
+        "  quick_sort(a, p + 1, hi) @@rec2",
         "",
         "def partition(a, lo, hi):           # Lomuto, pivot = a[hi]",
-        "  pivot, i = a[hi], lo",
-        "  for j in range(lo, hi):",
-        "    if a[j] < pivot:",
-        "      a[i], a[j] = a[j], a[i]",
-        "      i += 1",
-        "  a[i], a[hi] = a[hi], a[i]         # pivot lands at i",
-        "  return i",
+        "  pivot, i = a[hi], lo @@pivot",
+        "  for j in range(lo, hi): @@ploop",
+        "    if a[j] < pivot: @@pcmp",
+        "      a[i], a[j] = a[j], a[i] @@pswap",
+        "      i += 1 @@pswap",
+        "  a[i], a[hi] = a[hi], a[i]         # pivot lands at i @@pfinal",
+        "  return i @@pfinal",
       ],
-      map: {
-        java: [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 14],
-        cpp: [10, 11, 12, 13, 14, 9, 0, 1, 2, 3, 4, 6, 7],
-        python: [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14],
-      },
     },
 
     twothird: {
       pseudo: [
-        "twoThirdSort(A, i, j):",
-        "  if A[i] > A[j]: swap A[i], A[j]",
-        "  if j - i + 1 > 2",
-        "    t ← ⌊(j - i + 1) / 3⌋",
-        "    twoThirdSort(A, i,   j-t)   // first 2/3",
-        "    twoThirdSort(A, i+t, j  )   // last  2/3",
-        "    twoThirdSort(A, i,   j-t)   // first 2/3 again",
+        "twoThirdSort(A, i, j): @@fn",
+        "  if A[i] > A[j]: swap A[i], A[j] @@ends",
+        "  if j - i + 1 > 2: @@size",
+        "    t ← ⌊(j - i + 1) / 3⌋ @@t",
+        "    twoThirdSort(A, i,   j-t)   // first 2/3 @@r1",
+        "    twoThirdSort(A, i+t, j  )   // last  2/3 @@r2",
+        "    twoThirdSort(A, i,   j-t)   // first 2/3 again @@r3",
       ],
       java: [
-        "static void twoThirdSort(int[] a, int i, int j) {",
-        "  if (a[i] > a[j]) { int tmp=a[i]; a[i]=a[j]; a[j]=tmp; }",
-        "  if (j - i + 1 > 2) {",
-        "    int t = (j - i + 1) / 3;",
-        "    twoThirdSort(a, i,     j - t);   // first 2/3",
-        "    twoThirdSort(a, i + t, j    );   // last  2/3",
-        "    twoThirdSort(a, i,     j - t);   // first 2/3 again",
+        "static void twoThirdSort(int[] a, int i, int j) { @@fn",
+        "  if (a[i] > a[j]) { int tmp = a[i]; a[i] = a[j]; a[j] = tmp; } @@ends",
+        "  if (j - i + 1 > 2) { @@size",
+        "    int t = (j - i + 1) / 3; @@t",
+        "    twoThirdSort(a, i,     j - t);   // first 2/3 @@r1",
+        "    twoThirdSort(a, i + t, j    );   // last  2/3 @@r2",
+        "    twoThirdSort(a, i,     j - t);   // first 2/3 again @@r3",
         "  }",
         "}",
       ],
       cpp: [
-        "void twoThirdSort(vector<int>& a, int i, int j) {",
-        "  if (a[i] > a[j]) swap(a[i], a[j]);",
-        "  if (j - i + 1 > 2) {",
-        "    int t = (j - i + 1) / 3;",
-        "    twoThirdSort(a, i,     j - t);   // first 2/3",
-        "    twoThirdSort(a, i + t, j    );   // last  2/3",
-        "    twoThirdSort(a, i,     j - t);   // first 2/3 again",
+        "void twoThirdSort(vector<int>& a, int i, int j) { @@fn",
+        "  if (a[i] > a[j]) swap(a[i], a[j]); @@ends",
+        "  if (j - i + 1 > 2) { @@size",
+        "    int t = (j - i + 1) / 3; @@t",
+        "    twoThirdSort(a, i,     j - t);   // first 2/3 @@r1",
+        "    twoThirdSort(a, i + t, j    );   // last  2/3 @@r2",
+        "    twoThirdSort(a, i,     j - t);   // first 2/3 again @@r3",
         "  }",
         "}",
       ],
       python: [
-        "def two_third_sort(a, i, j):",
-        "  if a[i] > a[j]:",
-        "    a[i], a[j] = a[j], a[i]",
-        "  if j - i + 1 > 2:",
-        "    t = (j - i + 1) // 3",
-        "    two_third_sort(a, i,     j - t)   # first 2/3",
-        "    two_third_sort(a, i + t, j    )   # last  2/3",
-        "    two_third_sort(a, i,     j - t)   # first 2/3 again",
+        "def two_third_sort(a, i, j): @@fn",
+        "  if a[i] > a[j]: @@ends",
+        "    a[i], a[j] = a[j], a[i] @@ends",
+        "  if j - i + 1 > 2: @@size",
+        "    t = (j - i + 1) // 3 @@t",
+        "    two_third_sort(a, i,     j - t)   # first 2/3 @@r1",
+        "    two_third_sort(a, i + t, j    )   # last  2/3 @@r2",
+        "    two_third_sort(a, i,     j - t)   # first 2/3 again @@r3",
       ],
-      map: {
-        python: [0, 1, 3, 4, 5, 6, 7],
-      },
     },
 
     counting: {
       pseudo: [
-        "countingSort(A, k):      // values in 0..k",
-        "  C ← array of k+1 zeros",
-        "  for each x in A:  C[x] ← C[x] + 1",
-        "  for v ← 1 to k:   C[v] ← C[v] + C[v-1]",
-        "  // right-to-left keeps equal keys stable",
-        "  for idx ← n-1 down to 0",
-        "    C[A[idx]] ← C[A[idx]] - 1",
-        "    B[ C[A[idx]] ] ← A[idx]",
-        "  copy B back into A",
+        "countingSort(A, k):                  // keys in 0..k",
+        "  C ← array of k+1 zeros;  B ← array of n slots @@alloc",
+        "  for each x in A:  C[x] ← C[x] + 1   // count @@count",
+        "  for v ← 1 to k:   C[v] ← C[v] + C[v-1]   // prefix sums @@prefix",
+        "  for idx ← n-1 down to 0            // right to left keeps it stable @@place",
+        "    C[A[idx]] ← C[A[idx]] - 1 @@put",
+        "    B[C[A[idx]]] ← A[idx] @@put",
+        "  copy B back into A @@back",
       ],
       java: [
-        "static void countingSort(int[] a, int k) {   // values in 0..k",
-        "  int[] C = new int[k + 1];",
-        "  for (int x : a) C[x]++;",
-        "  for (int v = 1; v <= k; v++) C[v] += C[v - 1];",
-        "  int[] B = new int[a.length];",
-        "  // right-to-left keeps equal keys stable",
-        "  for (int idx = a.length - 1; idx >= 0; idx--) {",
-        "    C[a[idx]]--;",
-        "    B[C[a[idx]]] = a[idx];",
+        "static void countingSort(int[] a, int k) {",
+        "  int[] C = new int[k + 1]; @@alloc",
+        "  int[] B = new int[a.length]; @@alloc",
+        "  for (int x : a) C[x]++; @@count",
+        "  for (int v = 1; v <= k; v++) C[v] += C[v - 1]; @@prefix",
+        "  for (int idx = a.length - 1; idx >= 0; idx--) { @@place",
+        "    C[a[idx]]--; @@put",
+        "    B[C[a[idx]]] = a[idx]; @@put",
         "  }",
-        "  System.arraycopy(B, 0, a, 0, a.length);",
+        "  System.arraycopy(B, 0, a, 0, a.length); @@back",
         "}",
       ],
       cpp: [
-        "void countingSort(vector<int>& a, int k) {   // values in 0..k",
-        "  vector<int> C(k + 1, 0);",
-        "  for (int x : a) C[x]++;",
-        "  for (int v = 1; v <= k; v++) C[v] += C[v - 1];",
-        "  vector<int> B(a.size());",
-        "  // right-to-left keeps equal keys stable",
-        "  for (int idx = (int)a.size() - 1; idx >= 0; idx--) {",
-        "    C[a[idx]]--;",
-        "    B[C[a[idx]]] = a[idx];",
+        "void countingSort(vector<int>& a, int k) {",
+        "  vector<int> C(k + 1, 0); @@alloc",
+        "  vector<int> B(a.size()); @@alloc",
+        "  for (int x : a) C[x]++; @@count",
+        "  for (int v = 1; v <= k; v++) C[v] += C[v - 1]; @@prefix",
+        "  for (int idx = (int)a.size() - 1; idx >= 0; idx--) { @@place",
+        "    C[a[idx]]--; @@put",
+        "    B[C[a[idx]]] = a[idx]; @@put",
         "  }",
-        "  a = B;",
+        "  a = B; @@back",
         "}",
       ],
       python: [
-        "def counting_sort(a, k):              # values in 0..k",
-        "  C = [0] * (k + 1)",
-        "  for x in a:",
-        "    C[x] += 1",
-        "  for v in range(1, k + 1):",
-        "    C[v] += C[v - 1]",
-        "  B = [0] * len(a)",
-        "  # right-to-left keeps equal keys stable",
-        "  for idx in range(len(a) - 1, -1, -1):",
-        "    C[a[idx]] -= 1",
-        "    B[C[a[idx]]] = a[idx]",
-        "  a[:] = B",
+        "def counting_sort(a, k):",
+        "  C = [0] * (k + 1) @@alloc",
+        "  B = [0] * len(a) @@alloc",
+        "  for x in a: @@count",
+        "    C[x] += 1 @@count",
+        "  for v in range(1, k + 1): @@prefix",
+        "    C[v] += C[v - 1] @@prefix",
+        "  for idx in range(len(a) - 1, -1, -1): @@place",
+        "    C[a[idx]] -= 1 @@put",
+        "    B[C[a[idx]]] = a[idx] @@put",
+        "  a[:] = B @@back",
       ],
-      map: {
-        java: [0, 1, 2, 3, 5, 6, 7, 8, 10],
-        cpp: [0, 1, 2, 3, 5, 6, 7, 8, 10],
-        python: [0, 1, 2, 4, 7, 8, 9, 10, 11],
-      },
     },
   };
 
@@ -534,27 +487,30 @@
     run(a, s) {
       const n = a.length;
       for (let i = n - 1; i >= 1; i--) {
+        s.snap({}, "outer", "i = " + i + ". This pass bubbles the largest value in A[0…" + i + "] up to index " + i + ".");
         let swapped = false;
-        s.snap({}, 2, "New pass. <b>swapped = false</b>; this pass scans j = 0 … " + (i - 1) + ".");
+        s.snap({}, "reset", "swapped ← false.");
         for (let j = 0; j < i; j++) {
           s.cmp++;
-          s.snap({ [j]: "cmp", [j + 1]: "cmp" }, 5, "Compare <b>A[" + j + "] = " + a[j] + "</b> with <b>A[" + (j + 1) + "] = " + a[j + 1] + "</b>.");
-          if (a[j] > a[j + 1]) {
+          const out = a[j] > a[j + 1];
+          s.snap({ [j]: "cmp", [j + 1]: "cmp" }, ["inner", "cmp"], "j = " + j + ": is A[" + j + "] = " + a[j] + " &gt; A[" + (j + 1) + "] = " + a[j + 1] + "? " + (out ? "<b>Yes</b>." : "No, leave them."));
+          if (out) {
             [a[j], a[j + 1]] = [a[j + 1], a[j]];
             s.mov += 2;
             swapped = true;
-            s.snap({ [j]: "swap", [j + 1]: "swap" }, 6, "Out of order — swap them. The bigger value keeps moving right.");
+            s.snap({ [j]: "swap", [j + 1]: "swap" }, "swap", "Swap them and set swapped ← true. The bigger value keeps moving right.");
           }
         }
         s.done.add(i);
-        s.snap({}, 8, "End of pass: <b>A[" + i + "] = " + a[i] + "</b> is now in its final place.");
         if (!swapped) {
           for (let k = 0; k < i; k++) s.done.add(k);
-          s.snap({}, 8, "No swaps happened in that pass — the array is sorted, so bubble sort exits early.");
+          s.snap({}, "exit", "The inner loop is done and swapped is still false: no pair was out of order, so the array is sorted. <b>break</b>.");
           break;
         }
+        s.snap({}, "exit^", "Inner loop done: A[" + i + "] = " + a[i] + " is in its final place. swapped is true, so keep going.");
       }
       for (let k = 0; k < n; k++) s.done.add(k);
+      s.snap({}, null, "Sorted.");
     },
   };
 
@@ -569,27 +525,30 @@
     run(a, s) {
       const n = a.length;
       for (let i = 0; i < n - 1; i++) {
+        s.snap({ [i]: "active" }, "outer", "i = " + i + ": find the smallest value in A[" + i + "…" + (n - 1) + "] and put it at index " + i + ".");
         let min = i;
-        s.snap({ [i]: "active", [min]: "target" }, 2, "Looking for the smallest value in A[" + i + "…" + (n - 1) + "]. Assume it is A[" + i + "].");
+        s.snap({ [i]: "active", [min]: "target" }, "init", "min ← " + i + ": assume A[" + i + "] = " + a[i] + " is the smallest.");
         for (let j = i + 1; j < n; j++) {
           s.cmp++;
-          s.snap({ [j]: "cmp", [min]: "target", [i]: "active" }, 4, "Is A[" + j + "] = " + a[j] + " smaller than the current minimum " + a[min] + "?");
-          if (a[j] < a[min]) {
+          const less = a[j] < a[min];
+          s.snap({ [j]: "cmp", [min]: "target", [i]: "active" }, ["inner", "cmp"], "j = " + j + ": is A[" + j + "] = " + a[j] + " &lt; A[min] = " + a[min] + "? " + (less ? "<b>Yes</b>." : "No."));
+          if (less) {
             min = j;
-            s.snap({ [min]: "target", [i]: "active" }, 5, "Yes — the new minimum is <b>A[" + min + "] = " + a[min] + "</b>.");
+            s.snap({ [min]: "target", [i]: "active" }, "upd", "min ← " + j + ". The smallest so far is " + a[min] + ".");
           }
         }
         if (min !== i) {
           [a[i], a[min]] = [a[min], a[i]];
           s.mov += 2;
-          s.snap({ [i]: "swap", [min]: "swap" }, 6, "Swap the minimum into position " + i + ".");
+          s.done.add(i);
+          s.snap({ [i]: "swap", [min]: "swap" }, "swap", "min = " + min + " ≠ i = " + i + ": swap. A[" + i + "] = " + a[i] + " is now final.");
         } else {
-          s.snap({ [i]: "done" }, 6, "The minimum was already at position " + i + " — no swap needed.");
+          s.done.add(i);
+          s.snap({ [i]: "done" }, "swap^", "min == i: the minimum is already at index " + i + ", so the swap is skipped.");
         }
-        s.done.add(i);
       }
-      s.done.add(n - 1);
-      s.snap({}, 6, "Every prefix position holds its final value — sorted.");
+      for (let k = 0; k < n; k++) s.done.add(k);
+      s.snap({}, null, "Positions 0…" + (n - 2) + " are final, so the last one is too. Sorted.");
     },
   };
 
@@ -604,28 +563,31 @@
     run(a, s) {
       const n = a.length;
       s.done.add(0);
-      s.snap({ 0: "done" }, 1, "A one-element prefix is trivially sorted. Start at i = 1.");
       for (let i = 1; i < n; i++) {
+        s.snap({ [i]: "active" }, "outer", "i = " + i + ": A[0…" + (i - 1) + "] is sorted. Insert A[" + i + "] into it.");
         const key = a[i];
         let j = i - 1;
-        s.snap({ [i]: "active" }, 2, "Lift out <b>key = A[" + i + "] = " + key + "</b>, leaving a hole at " + i + ".", { key: key, hole: i });
-        while (j >= 0 && a[j] > key) {
+        s.snap({ [i]: "active" }, "key", "key ← A[" + i + "] = " + key + ", j ← " + j + ". Slot " + i + " is now a hole.", { key: key, hole: i });
+        for (;;) {
+          if (j < 0) { s.snap({}, "cmp", "j = −1: we reached the front, so the loop stops.", { key: key, hole: 0 }); break; }
           s.cmp++;
-          s.snap({ [j]: "cmp" }, 3, "A[" + j + "] = " + a[j] + " &gt; key " + key + " — it has to move right.", { key: key, hole: j + 1 });
-          a[j + 1] = a[j];
-          s.mov++;
-          s.snap({ [j + 1]: "swap" }, 4, "Shift A[" + j + "] into slot " + (j + 1) + ".", { key: key, hole: j });
-          j--;
-        }
-        if (j >= 0) {
-          s.cmp++;
-          s.snap({ [j]: "cmp" }, 3, "A[" + j + "] = " + a[j] + " ≤ key " + key + " — stop shifting.", { key: key, hole: j + 1 });
+          if (a[j] > key) {
+            s.snap({ [j]: "cmp" }, "cmp", "A[" + j + "] = " + a[j] + " &gt; key " + key + ": keep going.", { key: key, hole: j + 1 });
+            a[j + 1] = a[j];
+            s.mov++;
+            s.snap({ [j + 1]: "swap" }, "shift", "A[" + (j + 1) + "] ← A[" + j + "] = " + a[j] + ", then j ← " + (j - 1) + ".", { key: key, hole: j });
+            j--;
+          } else {
+            s.snap({ [j]: "cmp" }, "cmp", "A[" + j + "] = " + a[j] + " ≤ key " + key + ": the loop stops.", { key: key, hole: j + 1 });
+            break;
+          }
         }
         a[j + 1] = key;
         s.mov++;
         s.done.add(i);
-        s.snap({ [j + 1]: "done" }, 6, "Drop the key into slot " + (j + 1) + ". The prefix A[0…" + i + "] is sorted.");
+        s.snap({ [j + 1]: "done" }, "drop", "A[" + (j + 1) + "] ← key " + key + ". A[0…" + i + "] is sorted.");
       }
+      s.snap({}, null, "Sorted.");
     },
   };
 
@@ -639,40 +601,45 @@
       "splits into a heap at the front and a growing sorted suffix at the back — no extra memory at all.",
     run(a, s) {
       const n = a.length;
-      const down = (i, size, lineBase) => {
-        while (2 * i + 1 < size) {
-          let c = 2 * i + 1;
-          if (c + 1 < size) {
-            s.cmp++;
-            if (a[c + 1] > a[c]) c = c + 1;
+      const down = (i, size) => {
+        for (;;) {
+          const l = 2 * i + 1;
+          if (l >= size) {
+            s.snap({ [i]: "active" }, "dloop", "2·" + i + " + 1 = " + l + " ≥ size " + size + ": A[" + i + "] has no child in the heap, so the loop ends.", { heapSize: size });
+            return;
           }
+          let c = l;
+          if (c + 1 < size) { s.cmp++; if (a[c + 1] > a[c]) c = c + 1; }
+          s.snap({ [i]: "active", [c]: "cmp" }, "child", l + 1 < size
+            ? "Children of " + i + ": A[" + l + "] = " + a[l] + " and A[" + (l + 1) + "] = " + a[l + 1] + ". The larger is <b>A[" + c + "] = " + a[c] + "</b>."
+            : "A[" + i + "] has one child, A[" + c + "] = " + a[c] + ".", { heapSize: size });
           s.cmp++;
-          s.snap({ [i]: "active", [c]: "cmp" }, 11, "Sift down: compare A[" + i + "] = " + a[i] + " with its larger child A[" + c + "] = " + a[c] + ".", { heapSize: size });
           if (a[i] >= a[c]) {
-            s.snap({ [i]: "active" }, 12, "Parent is already ≥ child — the heap property holds here. Stop.", { heapSize: size });
-            break;
+            s.snap({ [i]: "active", [c]: "cmp" }, "dcmp", "A[" + i + "] = " + a[i] + " ≥ A[" + c + "] = " + a[c] + ": heap order holds. <b>break</b>.", { heapSize: size });
+            return;
           }
           [a[i], a[c]] = [a[c], a[i]];
           s.mov += 2;
-          s.snap({ [i]: "swap", [c]: "swap" }, 13, "Child is bigger — swap and keep sifting down from " + c + ".", { heapSize: size });
+          s.snap({ [i]: "swap", [c]: "swap" }, "dswap", "The parent was smaller than its child, so swap them and continue from i ← " + c + ".", { heapSize: size });
           i = c;
         }
       };
-      s.snap({}, 1, "<b>Phase 1 — build a max-heap.</b> Every index &gt; ⌊n/2⌋-1 is a leaf, so start at ⌊n/2⌋-1 = " + (Math.floor(n / 2) - 1) + ".", { heapSize: n });
+      s.snap({}, "build", "<b>Phase 1: build a max-heap.</b> Indices " + Math.floor(n / 2) + "…" + (n - 1) + " are leaves, so i starts at ⌊n/2⌋ − 1 = " + (Math.floor(n / 2) - 1) + ".", { heapSize: n });
       for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-        s.snap({ [i]: "active" }, 3, "Heapify the subtree rooted at " + i + ".", { heapSize: n });
+        s.snap({ [i]: "active" }, ["build", "bcall"], "i = " + i + ": downHeap(A, " + i + ", " + n + "): sift A[" + i + "] = " + a[i] + " down.", { heapSize: n });
         down(i, n);
       }
-      s.snap({ 0: "target" }, 4, "The array is a max-heap: A[0] = " + a[0] + " is the largest value. <b>Phase 2 — extract.</b>", { heapSize: n });
+      s.snap({ 0: "target" }, "extract", "<b>Phase 2.</b> A is a max-heap, so A[0] = " + a[0] + " is the largest value.", { heapSize: n });
       for (let end = n - 1; end >= 1; end--) {
         [a[0], a[end]] = [a[end], a[0]];
         s.mov += 2;
         s.done.add(end);
-        s.snap({ 0: "swap", [end]: "swap" }, 6, "Swap the max to index " + end + " — that slot is final. The heap shrinks to size " + end + ".", { heapSize: end });
+        s.snap({ 0: "swap", [end]: "swap" }, ["extract", "eswap"], "end = " + end + ": swap the max into A[" + end + "]. That slot is final; the heap is now A[0…" + (end - 1) + "].", { heapSize: end });
+        s.snap({ 0: "active" }, "ecall", "downHeap(A, 0, " + end + "): repair the heap from the root.", { heapSize: end });
         down(0, end);
       }
       s.done.add(0);
-      s.snap({}, 7, "Heap is empty and the whole array is sorted.", { heapSize: 0 });
+      s.snap({}, null, "Sorted.", { heapSize: 0 });
     },
   };
 
@@ -685,51 +652,49 @@
       "front element. The merge needs a scratch buffer, which is the O(n) extra space. Because ties take from the " +
       "left buffer first, merge sort is stable — and its O(n log n) bound holds on every input.",
     run(a, s) {
-      const merge = (lo, mid, hi, depth) => {
+      const rangeMarks = (lo, hi, cls) => { const m = {}; for (let t = lo; t <= hi; t++) m[t] = cls || "range"; return m; };
+      const merge = (lo, mid, hi) => {
         const L = a.slice(lo, mid + 1), R = a.slice(mid + 1, hi + 1);
         let i = 0, j = 0, k = lo;
         const rows = () => [
           { label: "L (A[" + lo + ".." + mid + "])", arr: L, marks: { [i]: "active" } },
           { label: "R (A[" + (mid + 1) + ".." + hi + "])", arr: R, marks: { [j]: "cmp" } },
         ];
-        s.snap(rangeMarks(lo, hi), 8, "Copy the two sorted halves into buffers <b>L</b> and <b>R</b>, then merge back into A[" + lo + "…" + hi + "].", { rows: rows() });
+        s.snap(rangeMarks(lo, hi), "copy", "merge: copy the halves into <b>L</b> and <b>R</b>; i = j = 0, k = " + lo + ".", { rows: rows() });
         while (i < L.length && j < R.length) {
           s.cmp++;
           const takeL = L[i] <= R[j];
-          s.snap(Object.assign(rangeMarks(lo, hi), { [k]: "active" }), 11, "Compare front of L (" + L[i] + ") with front of R (" + R[j] + ") → take <b>" + (takeL ? "L" : "R") + "</b>.", { rows: rows() });
           a[k++] = takeL ? L[i++] : R[j++];
           s.mov++;
-          s.snap(Object.assign(rangeMarks(lo, hi), { [k - 1]: "swap" }), 11, "Write " + a[k - 1] + " into A[" + (k - 1) + "].", { rows: rows() });
+          s.snap(Object.assign(rangeMarks(lo, hi), { [k - 1]: "swap" }), "take", "L[i] = " + (takeL ? a[k - 1] : L[i]) + " vs R[j] = " + (takeL ? R[j] : a[k - 1]) + " → take " + (takeL ? "L" : "R") + "'s " + a[k - 1] + " and write it to A[" + (k - 1) + "].", { rows: rows() });
         }
-        while (i < L.length) {
-          a[k++] = L[i++]; s.mov++;
-          s.snap(Object.assign(rangeMarks(lo, hi), { [k - 1]: "swap" }), 12, "R is exhausted — copy the rest of L: " + a[k - 1] + " → A[" + (k - 1) + "].", { rows: rows() });
+        while (i < L.length || j < R.length) {
+          const fromL = i < L.length;
+          a[k++] = fromL ? L[i++] : R[j++];
+          s.mov++;
+          s.snap(Object.assign(rangeMarks(lo, hi), { [k - 1]: "swap" }), "rest", (fromL ? "R" : "L") + " is used up: copy " + a[k - 1] + " from " + (fromL ? "L" : "R") + " to A[" + (k - 1) + "].", { rows: rows() });
         }
-        while (j < R.length) {
-          a[k++] = R[j++]; s.mov++;
-          s.snap(Object.assign(rangeMarks(lo, hi), { [k - 1]: "swap" }), 12, "L is exhausted — copy the rest of R: " + a[k - 1] + " → A[" + (k - 1) + "].", { rows: rows() });
-        }
-        s.snap(rangeMarks(lo, hi, "done"), 12, "A[" + lo + "…" + hi + "] is merged and sorted (" + (hi - lo + 1) + " elements).");
       };
       const ms = (lo, hi, depth) => {
+        if (s.stop()) return;
+        s.snap(rangeMarks(lo, hi), "fn", "mergeSort(A, " + lo + ", " + hi + ") at depth " + depth + ".");
         if (lo >= hi) {
-          if (lo === hi) s.snap({ [lo]: "done" }, 1, "A[" + lo + "] alone is already sorted — base case, return.");
+          s.snap(lo === hi ? { [lo]: "done" } : {}, "base", lo === hi ? "One element is already sorted: return." : "Empty range: return.");
           return;
         }
         const mid = Math.floor((lo + hi) / 2);
-        s.snap(rangeMarks(lo, hi), 2, "Split A[" + lo + "…" + hi + "] at mid = " + mid + " (depth " + depth + ").");
+        s.snap(rangeMarks(lo, hi), "mid", "mid = ⌊(" + lo + " + " + hi + ")/2⌋ = " + mid + ".");
+        s.snap(rangeMarks(lo, mid), "rec1", "Sort the left half A[" + lo + "…" + mid + "].");
         ms(lo, mid, depth + 1);
+        s.snap(rangeMarks(mid + 1, hi), "rec2", "Back in mergeSort(A, " + lo + ", " + hi + "). Now sort the right half A[" + (mid + 1) + "…" + hi + "].");
         ms(mid + 1, hi, depth + 1);
-        merge(lo, mid, hi, depth);
-      };
-      const rangeMarks = (lo, hi, cls) => {
-        const m = {};
-        for (let t = lo; t <= hi; t++) m[t] = cls || "range";
-        return m;
+        s.snap(rangeMarks(lo, hi), "mcall", "Both halves are sorted. Merge them.");
+        merge(lo, mid, hi);
+        s.snap(rangeMarks(lo, hi, "done"), "mcall", "merge returned: A[" + lo + "…" + hi + "] is sorted.");
       };
       ms(0, a.length - 1, 0);
       for (let k = 0; k < a.length; k++) s.done.add(k);
-      s.snap({}, 5, "Every level has been merged — the array is sorted.");
+      s.snap({}, null, "Sorted.");
     },
   };
 
@@ -747,40 +712,43 @@
       const part = (lo, hi) => {
         const pivot = a[hi];
         let i = lo;
-        s.snap(Object.assign(rangeMarks(lo, hi), { [hi]: "pivot" }), 7, "Pivot = <b>A[" + hi + "] = " + pivot + "</b>. Boundary i = " + i + ".");
+        s.snap(Object.assign(rangeMarks(lo, hi), { [hi]: "pivot" }), "pivot", "partition: pivot ← A[" + hi + "] = " + pivot + ", i ← " + lo + ".");
         for (let j = lo; j < hi; j++) {
           s.cmp++;
-          s.snap(Object.assign(rangeMarks(lo, hi), { [hi]: "pivot", [j]: "cmp", [i]: "active" }), 9, "Is A[" + j + "] = " + a[j] + " &lt; pivot " + pivot + "?");
-          if (a[j] < pivot) {
-            if (i !== j) {
-              [a[i], a[j]] = [a[j], a[i]];
-              s.mov += 2;
-              s.snap(Object.assign(rangeMarks(lo, hi), { [hi]: "pivot", [i]: "swap", [j]: "swap" }), 10, "Yes — swap it into the &lt;-pivot region and advance i to " + (i + 1) + ".");
-            } else {
-              s.snap(Object.assign(rangeMarks(lo, hi), { [hi]: "pivot", [i]: "swap" }), 10, "Yes — it is already at the boundary, just advance i to " + (i + 1) + ".");
-            }
+          const less = a[j] < pivot;
+          s.snap(Object.assign(rangeMarks(lo, hi), { [hi]: "pivot", [j]: "cmp", [i]: "active" }), ["ploop", "pcmp"], "j = " + j + ": is A[" + j + "] = " + a[j] + " &lt; pivot " + pivot + "? " + (less ? "<b>Yes</b>." : "No."));
+          if (less) {
+            if (i !== j) { [a[i], a[j]] = [a[j], a[i]]; s.mov += 2; }
+            s.snap(Object.assign(rangeMarks(lo, hi), { [hi]: "pivot", [i]: "swap", [j]: "swap" }), "pswap", i !== j
+              ? "Swap A[" + i + "] and A[" + j + "] to grow the &lt;-pivot region, then i ← " + (i + 1) + "."
+              : "i = j, so the swap changes nothing. i ← " + (i + 1) + ".");
             i++;
           }
         }
         [a[i], a[hi]] = [a[hi], a[i]];
         s.mov += 2;
         s.done.add(i);
-        s.snap(Object.assign(rangeMarks(lo, hi), { [i]: "done" }), 11, "Swap the pivot into the boundary: <b>A[" + i + "] = " + pivot + "</b> is now in its final position.");
+        s.snap(Object.assign(rangeMarks(lo, hi), { [i]: "done" }), "pfinal", "Swap the pivot into A[" + i + "]. Everything left of it is smaller and everything right is ≥, so " + pivot + " is final. Return " + i + ".");
         return i;
       };
       const qs = (lo, hi) => {
+        if (s.stop()) return;
+        s.snap(lo <= hi ? rangeMarks(lo, hi) : {}, "fn", "quickSort(A, " + lo + ", " + hi + ").");
         if (lo >= hi) {
-          if (lo === hi) { s.done.add(lo); s.snap({ [lo]: "done" }, 1, "A[" + lo + "] is a single element — base case."); }
+          if (lo === hi) s.done.add(lo);
+          s.snap(lo === hi ? { [lo]: "done" } : {}, "base", lo === hi ? "A[" + lo + "] is a single element: return." : "Empty range: return.");
           return;
         }
-        s.snap(rangeMarks(lo, hi), 0, "quickSort on A[" + lo + "…" + hi + "].");
+        s.snap(rangeMarks(lo, hi), "part", "Partition A[" + lo + "…" + hi + "] around the pivot A[" + hi + "].");
         const p = part(lo, hi);
+        s.snap(p - 1 >= lo ? rangeMarks(lo, p - 1) : {}, "rec1", "partition returned p = " + p + ". Sort the left part A[" + lo + "…" + (p - 1) + "].");
         qs(lo, p - 1);
+        s.snap(p + 1 <= hi ? rangeMarks(p + 1, hi) : {}, "rec2", "Back in quickSort(A, " + lo + ", " + hi + "). Sort the right part A[" + (p + 1) + "…" + hi + "].");
         qs(p + 1, hi);
       };
       qs(0, a.length - 1);
       for (let k = 0; k < a.length; k++) s.done.add(k);
-      s.snap({}, 4, "All partitions are size ≤ 1 — the array is sorted.");
+      s.snap({}, null, "Sorted.");
     },
   };
 
@@ -799,27 +767,31 @@
       const rangeMarks = (lo, hi) => { const m = {}; for (let t = lo; t <= hi; t++) m[t] = "range"; return m; };
       const rec = (i, j, depth) => {
         if (s.stop()) return;
-        s.snap(rangeMarks(i, j), 0, "twoThirdSort(A, " + i + ", " + j + ") — " + (j - i + 1) + " elements, depth " + depth + ".");
+        s.snap(rangeMarks(i, j), "fn", "twoThirdSort(A, " + i + ", " + j + "): " + (j - i + 1) + " elements, depth " + depth + ".");
         s.cmp++;
-        s.snap(Object.assign(rangeMarks(i, j), { [i]: "cmp", [j]: "cmp" }), 1, "Compare the two ends: A[" + i + "] = " + a[i] + " and A[" + j + "] = " + a[j] + ".");
         if (a[i] > a[j]) {
           [a[i], a[j]] = [a[j], a[i]];
           s.mov += 2;
-          s.snap(Object.assign(rangeMarks(i, j), { [i]: "swap", [j]: "swap" }), 1, "Ends were out of order — swap them.");
+          s.snap(Object.assign(rangeMarks(i, j), { [i]: "swap", [j]: "swap" }), "ends", "A[" + i + "] &gt; A[" + j + "]: the ends are out of order, so swap them.");
+        } else {
+          s.snap(Object.assign(rangeMarks(i, j), { [i]: "cmp", [j]: "cmp" }), "ends^", "A[" + i + "] = " + a[i] + " ≤ A[" + j + "] = " + a[j] + ": the ends are in order.");
         }
         if (j - i + 1 > 2) {
           const t = Math.floor((j - i + 1) / 3);
-          s.snap(rangeMarks(i, j - t), 4, "t = " + t + ". Recurse on the <b>first two-thirds</b> A[" + i + "…" + (j - t) + "].");
+          s.snap(rangeMarks(i, j), "t", (j - i + 1) + " &gt; 2 elements, so t = ⌊" + (j - i + 1) + "/3⌋ = " + t + ".");
+          s.snap(rangeMarks(i, j - t), "r1", "Sort the <b>first two-thirds</b> A[" + i + "…" + (j - t) + "].");
           rec(i, j - t, depth + 1);
-          s.snap(rangeMarks(i + t, j), 5, "Now the <b>last two-thirds</b> A[" + (i + t) + "…" + j + "] — this pulls the big values to the back.");
+          s.snap(rangeMarks(i + t, j), "r2", "Sort the <b>last two-thirds</b> A[" + (i + t) + "…" + j + "]. This pulls the big values to the back.");
           rec(i + t, j, depth + 1);
-          s.snap(rangeMarks(i, j - t), 6, "And the <b>first two-thirds again</b> — the previous call may have disturbed it.");
+          s.snap(rangeMarks(i, j - t), "r3", "Sort the <b>first two-thirds again</b>: the previous call may have disturbed it.");
           rec(i, j - t, depth + 1);
+        } else {
+          s.snap(rangeMarks(i, j), "size", "Only " + (j - i + 1) + " element(s), and the ends are in order: return.");
         }
       };
       rec(0, a.length - 1, 0);
       for (let k = 0; k < a.length; k++) s.done.add(k);
-      s.snap({}, 6, "Sorted — in a spectacularly inefficient number of steps.");
+      s.snap({}, null, "Sorted, in a spectacularly inefficient number of steps.");
     },
   };
 
@@ -841,37 +813,33 @@
         { label: "C (counts, index = key)", arr: C, marks: cm || {}, showIndex: true },
         { label: "B (output)", arr: B, marks: bm || {} },
       ];
-      s.snap({}, 1, "Keys range over 0…" + k + ", so C has " + (k + 1) + " slots, all zero.", { rows: rows() });
+      s.snap({}, "alloc", "Keys range over 0…" + k + ", so C gets " + (k + 1) + " zeros and B gets " + n + " empty slots.", { rows: rows() });
       for (let i = 0; i < n; i++) {
         C[a[i]]++;
         s.mov++;
-        s.snap({ [i]: "active" }, 2, "Saw key " + a[i] + " — bump <b>C[" + a[i] + "]</b> to " + C[a[i]] + ".", { rows: rows({ [a[i]]: "swap" }) });
+        s.snap({ [i]: "active" }, "count", "x = A[" + i + "] = " + a[i] + ": C[" + a[i] + "] becomes " + C[a[i]] + ".", { rows: rows({ [a[i]]: "swap" }) });
       }
-      s.snap({}, 2, "Counting pass done. C now holds the frequency of every key.", { rows: rows() });
       for (let v = 1; v <= k; v++) {
         C[v] += C[v - 1];
-        s.snap({}, 3, "Prefix sum: <b>C[" + v + "] = " + C[v] + "</b> — that many elements are ≤ " + v + ".", { rows: rows({ [v]: "swap", [v - 1]: "cmp" }) });
+        s.snap({}, "prefix", "v = " + v + ": C[" + v + "] += C[" + (v - 1) + "] → " + C[v] + ". That many keys are ≤ " + v + ".", { rows: rows({ [v]: "swap", [v - 1]: "cmp" }) });
       }
-      s.snap({}, 4, "C is now a set of end-positions. Walk the input from the right to stay stable.", { rows: rows() });
       for (let i = n - 1; i >= 0; i--) {
         const key = a[i];
         C[key]--;
         B[C[key]] = key;
         s.mov++;
-        s.snap({ [i]: "active" }, 6, "A[" + i + "] = " + key + " → C[" + key + "] drops to " + C[key] + ", so place it at <b>B[" + C[key] + "]</b>.", { rows: rows({ [key]: "cmp" }, { [C[key]]: "swap" }) });
+        s.snap({ [i]: "active" }, ["place", "put"], "idx = " + i + ": A[" + i + "] = " + key + ". C[" + key + "] drops to " + C[key] + ", so B[" + C[key] + "] ← " + key + ".", { rows: rows({ [key]: "cmp" }, { [C[key]]: "swap" }) });
       }
-      for (let i = 0; i < n; i++) {
-        a[i] = B[i];
-        s.done.add(i);
-        s.snap({ [i]: "done" }, 8, "Copy B[" + i + "] = " + B[i] + " back into A[" + i + "].", { rows: rows({}, { [i]: "done" }) });
-      }
-      s.snap({}, 8, "Sorted with zero comparisons in Θ(n + k) = Θ(" + n + " + " + k + ").", { rows: rows() });
+      for (let i = 0; i < n; i++) { a[i] = B[i]; s.done.add(i); }
+      s.snap({}, "back", "Copy B back into A.", { rows: rows({}, allMarks(n, "done")) });
+      s.snap({}, null, "Sorted with zero comparisons, in Θ(n + k) = Θ(" + n + " + " + k + ").", { rows: rows() });
+      function allMarks(m, cls) { const o = {}; for (let t = 0; t < m; t++) o[t] = cls; return o; }
     },
   };
 
   /* ---------- page wiring ---------- */
   const ORDER = ["bubble", "selection", "insertion", "heap", "merge", "quick", "twothird", "counting"];
-  let arr = [], barsEl = null, code = null, cur = "bubble";
+  let arr = [], barsEl = null, cur = "bubble";
 
   const q = (id) => D.$("#" + id);
 
@@ -897,8 +865,12 @@
     return wrap;
   }
 
+  const LISTINGS = {};
+  Object.keys(ALGO).forEach((id) => (LISTINGS[id] = Object.assign({ title: ALGO[id].label }, ALGO[id].code)));
+  const dock = D.CodeDock("#code", LISTINGS);
   const player = new D.Player({
     mount: "#player",
+    code: dock,
     render(f) {
       if (!f.arr) return;
       if (barsEl.children.length !== f.arr.length) buildBars(f.arr.length);
@@ -921,12 +893,11 @@
 
       q("s-cmp").textContent = f.cmp == null ? "–" : f.cmp;
       q("s-mov").textContent = f.mov == null ? "–" : f.mov;
-      if (code && f.line != null) code.highlight(f.line);
     },
   });
 
   function drawStatic() {
-    player.load([{ arr: arr.slice(), marks: {}, cmp: 0, mov: 0, note: "Array loaded — press <b>Run</b> (or Play) to sort it." }], false);
+    player.load([{ arr: arr.slice(), marks: {}, cmp: 0, mov: 0, code: cur, note: "Array loaded — press <b>Run</b> (or Play) to sort it." }], false);
   }
 
   function selectAlgo(id) {
@@ -935,7 +906,7 @@
     q("algo-name").textContent = A.label;
     q("algo-blurb").innerHTML = A.blurb;
     q("algo-big").innerHTML = A.big.map((b) => "<span>" + b + "</span>").join("");
-    code = D.CodeBlock("#code", A.code);
+    dock.show(id);
     D.$$("#algo-tabs button").forEach((b) => b.classList.toggle("active", b.dataset.id === id));
     if (A.maxN && arr.length > A.maxN) {
       newArray(A.maxN, "random");
@@ -989,10 +960,10 @@
         const m = {};
         this.done.forEach((i) => (m[i] = "done"));
         Object.assign(m, marks || {});
-        R.push(Object.assign({ arr: a.slice(), marks: m, line: line, note: note, cmp: this.cmp, mov: this.mov }, extra || {}));
+        R.push(Object.assign({ arr: a.slice(), marks: m, code: cur, line: line, note: note, cmp: this.cmp, mov: this.mov }, extra || {}));
       },
     };
-    s.snap({}, 0, "Start <b>" + A.label + "</b> on " + a.length + " elements.");
+    s.snap({}, null, "Start <b>" + A.label + "</b> on " + a.length + " elements.");
     A.run(a, s);
     if (R.overflow) D.toast("Step limit reached — try a smaller array.", true);
     q("s-frames").textContent = R.frames.length;
@@ -1031,6 +1002,21 @@
       { color: "var(--c-pivot)", label: "pivot" },
       { color: "var(--c-target)", label: "current min" },
       { color: "var(--c-done)", label: "final position" },
+    ]);
+    const ex = (algo, n, kind, why) => () => {
+      selectAlgo(algo);
+      q("kind").value = kind;
+      newArray(n, kind);
+      run();
+      if (why) D.toast(why);
+    };
+    D.Examples("#examples", [
+      { label: "bubble sort exits early on sorted input", run: ex("bubble", 8, "sorted", "One pass, no swaps, done: Ω(n).") },
+      { label: "insertion sort on nearly sorted", run: ex("insertion", 12, "nearly", "Only a few shifts: close to linear.") },
+      { label: "quick sort's worst case: sorted input", run: ex("quick", 10, "sorted", "Last-element pivot on sorted input gives Θ(n²).") },
+      { label: "merge sort on 8 elements", run: ex("merge", 8, "random") },
+      { label: "heap sort on reversed input", run: ex("heap", 10, "reverse") },
+      { label: "counting sort with few distinct keys", run: ex("counting", 12, "few") },
     ]);
     arr = D.randArray(20, 5, 99);
     selectAlgo("bubble");
